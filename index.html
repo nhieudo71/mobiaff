@@ -130,52 +130,73 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100dvh}
       </div>
     </div>
 
-    <!-- Method toggle -->
+    <!-- Tip banner -->
+    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-3 flex gap-2 items-start">
+      <span class="material-symbols-outlined text-blue-500 text-base shrink-0 mt-0.5">tips_and_updates</span>
+      <p class="text-xs text-blue-700 dark:text-blue-300"><strong>Mẹo:</strong> Kết hợp cả <strong>link + ảnh chụp</strong> sẽ cho kết quả chính xác nhất — Gemini dùng ảnh để đọc giá chính xác, link để xác định nguồn.</p>
+    </div>
+
+    <!-- STEP 1: Link -->
     <div>
-      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Phương thức nhận diện AI</p>
-      <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-        <button onclick="setMethod('url')" id="method-url" class="method-btn active"><span class="material-symbols-outlined text-sm" style="vertical-align:-4px">link</span> Từ link URL</button>
-        <button onclick="setMethod('image')" id="method-image" class="method-btn"><span class="material-symbols-outlined text-sm" style="vertical-align:-4px">photo_camera</span> Từ ảnh chụp</button>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="size-6 bg-primary text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
+        <p class="text-sm font-bold">Dán link sản phẩm <span class="text-slate-400 font-normal">(bắt buộc)</span></p>
       </div>
-    </div>
-
-    <!-- URL input -->
-    <div id="section-url">
-      <p class="text-base font-semibold pb-2">Dán link sản phẩm</p>
       <div class="relative">
-        <input id="product-url" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 h-14 placeholder:text-slate-400 p-4 pr-12 text-base outline-none focus:ring-2 focus:ring-primary/50 shadow-sm" placeholder="https://shopee.vn/... lazada.vn/... tiki.vn/..." type="url"/>
-        <button onclick="pasteClipboard()" class="absolute right-3 top-3 text-primary btn-press" title="Dán từ clipboard"><span class="material-symbols-outlined">content_paste</span></button>
+        <input id="product-url" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 h-12 placeholder:text-slate-400 p-4 pr-12 text-sm outline-none focus:ring-2 focus:ring-primary/50 shadow-sm" placeholder="https://shopee.vn/...  lazada.vn/...  tiki.vn/..." type="url"/>
+        <button onclick="pasteClipboard()" class="absolute right-3 top-2.5 text-primary btn-press" title="Dán từ clipboard"><span class="material-symbols-outlined">content_paste</span></button>
       </div>
-      <div class="flex gap-2 mt-2 flex-wrap">
-        <span class="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-600 font-semibold dark:bg-orange-900/30 dark:text-orange-400">Shopee ✓</span>
-        <span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-600 font-semibold dark:bg-red-900/30 dark:text-red-400">Lazada ✓</span>
-        <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400">Tiki ✓</span>
-        <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-500 font-semibold dark:bg-slate-700 dark:text-slate-400">& nhiều sàn khác</span>
+      <div class="flex gap-1.5 mt-2 flex-wrap">
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 font-semibold dark:bg-orange-900/30 dark:text-orange-400">Shopee</span>
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-semibold dark:bg-red-900/30 dark:text-red-400">Lazada</span>
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400">Tiki</span>
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-pink-100 text-pink-600 font-semibold dark:bg-pink-900/30 dark:text-pink-400">TikTok Shop</span>
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-semibold dark:bg-slate-700 dark:text-slate-400">& sàn khác</span>
       </div>
-      <button id="btn-scan-url" onclick="scanFromUrl()" class="mt-3 w-full h-12 rounded-xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:brightness-110 btn-press shadow-md shadow-primary/20">
-        <span class="material-symbols-outlined text-sm">auto_awesome</span> Nhận diện với Gemini AI
-      </button>
     </div>
 
-    <!-- Image input -->
-    <div id="section-image" style="display:none">
-      <p class="text-base font-semibold pb-2">Tải ảnh chụp màn hình sản phẩm</p>
+    <!-- STEP 2: Ảnh -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="size-6 bg-slate-300 dark:bg-slate-600 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0" id="step2-num">2</span>
+          <p class="text-sm font-bold">Ảnh chụp màn hình <span class="text-slate-400 font-normal text-xs">(không bắt buộc, nhưng giúp chính xác hơn)</span></p>
+        </div>
+        <button id="img-clear-btn" onclick="clearImage()" style="display:none" class="text-xs text-red-400 font-semibold btn-press flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">close</span> Xóa ảnh
+        </button>
+      </div>
       <input type="file" id="img-input" accept="image/*" onchange="handleImgSelect(event)"/>
       <div class="upload-zone" id="upload-zone" onclick="document.getElementById('img-input').click()"
         ondragover="event.preventDefault();this.classList.add('drag')"
         ondragleave="this.classList.remove('drag')"
         ondrop="event.preventDefault();this.classList.remove('drag');handleImgDrop(event)">
         <div id="upload-placeholder">
-          <span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 block mb-2">add_photo_alternate</span>
-          <p class="text-sm font-semibold text-slate-500">Nhấn để chọn ảnh</p>
-          <p class="text-xs text-slate-400 mt-1">hoặc kéo thả ảnh • JPG, PNG, WebP</p>
+          <span class="material-symbols-outlined text-3xl text-slate-300 dark:text-slate-600 block mb-1">add_photo_alternate</span>
+          <p class="text-sm font-semibold text-slate-500">Nhấn hoặc kéo thả ảnh vào đây</p>
+          <p class="text-xs text-slate-400 mt-0.5">JPG, PNG, WebP — chụp màn hình trang sản phẩm</p>
         </div>
-        <img id="img-thumb" style="display:none;max-height:160px;width:100%;object-fit:contain;border-radius:8px;margin:auto"/>
+        <div id="img-preview-wrap" style="display:none" class="relative">
+          <img id="img-thumb" style="max-height:150px;width:100%;object-fit:contain;border-radius:8px;margin:auto;display:block"/>
+          <div class="absolute top-1 right-1 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">check_circle</span> Đã chọn
+          </div>
+        </div>
       </div>
-      <button id="btn-scan-img" onclick="scanFromImage()" style="display:none" class="mt-3 w-full h-12 rounded-xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:brightness-110 btn-press shadow-md shadow-primary/20">
-        <span class="material-symbols-outlined text-sm">auto_awesome</span> Phân tích ảnh với Gemini AI
-      </button>
+      <!-- Accuracy indicator -->
+      <div id="accuracy-bar" class="mt-2 p-2 rounded-lg flex items-center gap-2" style="display:none">
+        <div class="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div id="accuracy-fill" class="h-full rounded-full transition-all duration-500" style="width:50%"></div>
+        </div>
+        <p id="accuracy-label" class="text-xs font-semibold whitespace-nowrap"></p>
+      </div>
     </div>
+
+    <!-- Nút nhận diện chính -->
+    <button id="btn-scan-main" onclick="scanCombined()" class="w-full h-13 rounded-xl bg-primary text-white font-bold flex items-center justify-center gap-2 hover:brightness-110 btn-press shadow-lg shadow-primary/25 py-3.5">
+      <span class="material-symbols-outlined">auto_awesome</span>
+      <span id="btn-scan-label">Nhận diện với Gemini AI</span>
+    </button>
 
     <!-- Link affiliate -->
     <div id="affiliate-link-section" class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4">
@@ -857,43 +878,34 @@ function confirmDeleteProduct(){
 
 // ===== ADD =====
 function checkApiWarn(){document.getElementById('api-warning').style.display=getKey()?'none':'flex';}
-function setMethod(m){
-  currentMethod=m;
-  document.getElementById('method-url').classList.toggle('active',m==='url');
-  document.getElementById('method-image').classList.toggle('active',m==='image');
-  document.getElementById('section-url').style.display=m==='url'?'block':'none';
-  document.getElementById('section-image').style.display=m==='image'?'block':'none';
-  hideResult();
-}
+// setMethod removed — now using combined mode
 function hideResult(){document.getElementById('scan-skeleton').style.display='none';document.getElementById('preview-section').style.display='none';}
 function resetAdd(){
   document.getElementById('product-url').value='';
-  document.getElementById('affiliate-url-input').value='';
-  document.getElementById('affiliate-url-preview').style.display='none';
+  const affInp=document.getElementById('affiliate-url-input');if(affInp)affInp.value='';
+  const affPrev=document.getElementById('affiliate-url-preview');if(affPrev)affPrev.style.display='none';
   imgBase64=null;
-  document.getElementById('img-thumb').style.display='none';
-  document.getElementById('img-thumb').src='';
-  document.getElementById('upload-placeholder').style.display='block';
-  document.getElementById('btn-scan-img').style.display='none';
+  const thumb=document.getElementById('img-thumb');if(thumb)thumb.src='';
+  const wrap=document.getElementById('img-preview-wrap');if(wrap)wrap.style.display='none';
+  const ph=document.getElementById('upload-placeholder');if(ph)ph.style.display='block';
+  const clrBtn=document.getElementById('img-clear-btn');if(clrBtn)clrBtn.style.display='none';
+  const imgInp=document.getElementById('img-input');if(imgInp)imgInp.value='';
   hideResult();
   document.getElementById('edit-section').style.display='none';
   activeTags=[];
   document.querySelectorAll('.tag-btn').forEach(b=>b.classList.remove('bg-primary/10','text-primary','border-primary'));
   pendingProduct=null;
-  setMethod('url');
+  updateAccuracyBar();
 }
 function setScanLoading(msg){
-  const id=currentMethod==='url'?'btn-scan-url':'btn-scan-img';
-  const btn=document.getElementById(id);
-  btn.innerHTML=`<span class="spinner"></span>&nbsp;${msg}`;btn.disabled=true;
+  const btn=document.getElementById('btn-scan-main');
+  if(btn){btn.innerHTML=`<span class="spinner"></span>&nbsp;${msg}`;btn.disabled=true;}
   document.getElementById('scan-skeleton').style.display='block';
   document.getElementById('preview-section').style.display='none';
 }
 function clearScanLoading(){
-  document.getElementById('btn-scan-url').innerHTML=`<span class="material-symbols-outlined text-sm">auto_awesome</span> Nhận diện với Gemini AI`;
-  document.getElementById('btn-scan-url').disabled=false;
-  document.getElementById('btn-scan-img').innerHTML=`<span class="material-symbols-outlined text-sm">auto_awesome</span> Phân tích ảnh với Gemini AI`;
-  document.getElementById('btn-scan-img').disabled=false;
+  const btn=document.getElementById('btn-scan-main');
+  if(btn){btn.innerHTML=`<span class="material-symbols-outlined">auto_awesome</span>&nbsp;<span id="btn-scan-label">Nhận diện với Gemini AI</span>`;btn.disabled=false;}
   document.getElementById('scan-skeleton').style.display='none';
 }
 async function pasteClipboard(){try{const t=await navigator.clipboard.readText();document.getElementById('product-url').value=t;showToast('📋 Đã dán');}catch{showToast('⚠️ Không thể đọc clipboard');}}
@@ -913,20 +925,42 @@ function showAffiliatePreview(url){
 document.addEventListener('DOMContentLoaded',()=>{
   const inp=document.getElementById('affiliate-url-input');
   if(inp)inp.addEventListener('input',e=>showAffiliatePreview(e.target.value));
+  const urlInp=document.getElementById('product-url');
+  if(urlInp)urlInp.addEventListener('input',updateAccuracyBar);
 });
 
 // ===== GEMINI API =====
-const PROMPT=`Bạn là trợ lý trích xuất thông tin sản phẩm. Hãy đọc nội dung và trả về ĐÚNG MỘT ĐỐI TƯỢNG JSON hợp lệ, không có bất kỳ văn bản nào khác trước hoặc sau.
-Các trường bắt buộc (dùng chuỗi rỗng nếu không tìm thấy, KHÔNG dùng null):
-- name: tên đầy đủ của sản phẩm
-- price: giá bán hiện tại kèm đơn vị (ví dụ: 299.000đ)
-- orig: giá gốc trước giảm (để trống nếu không có)
-- img: URL ảnh sản phẩm đầu tiên (để trống nếu không có)
-- source: tên sàn thương mại (Shopee / Lazada / Tiki / TikTok Shop / ...)
-- commission: ước tính hoa hồng 5% của giá bán (ví dụ: ~14.950đ)
-- desc: mô tả sản phẩm ngắn gọn trong 1 câu, không dùng ký tự nháy đơn hay nháy kép bên trong
-Nếu không trích xuất được: {"error":"Không đọc được thông tin sản phẩm"}
-CHÚ Ý: Chỉ trả về JSON thuần, không markdown, không giải thích, không backtick.`;
+const PROMPT_URL_ONLY = `Bạn là chuyên gia trích xuất thông tin sản phẩm thương mại điện tử Việt Nam.
+Truy cập URL sau và đọc nội dung trang web, sau đó trả về JSON.
+
+QUY TẮC TRÍCH XUẤT:
+- name: Tên sản phẩm ĐẦY ĐỦ (bao gồm dung lượng, màu sắc, phiên bản nếu có)
+- price: Giá HIỆN TẠI đang bán (tìm trong các thẻ có class chứa "price", "sale", "current", "final"). Ưu tiên giá sau giảm. Định dạng: "299.000đ"
+- orig: Giá GỐC trước giảm nếu có (thường bị gạch ngang), để trống nếu không có
+- img: URL ảnh sản phẩm CHÍNH (ảnh đầu tiên/lớn nhất, thường trong thẻ <img> có class "product-image" hoặc tương tự)
+- source: Tên sàn — phát hiện từ domain URL (shopee.vn→Shopee, lazada.vn→Lazada, tiki.vn→Tiki, tiktok.com→TikTok Shop)
+- commission: Tính 5% của price (ví dụ giá 200.000đ → "~10.000đ")
+- desc: Mô tả ngắn 1 câu về sản phẩm
+
+LƯU Ý QUAN TRỌNG:
+- Nếu trang dùng JavaScript động (Shopee), hãy cố đọc từ structured data (JSON-LD, meta og:), title tag, hoặc bất kỳ text nào có thể đọc được
+- Tuyệt đối KHÔNG được trả về null — dùng chuỗi rỗng "" nếu không tìm thấy
+- Chỉ trả về JSON thuần, không markdown, không backtick, không giải thích`;
+
+const PROMPT_WITH_IMAGE = `Bạn là chuyên gia trích xuất thông tin sản phẩm thương mại điện tử Việt Nam.
+Tôi cung cấp cho bạn: (1) ẢNH CHỤP MÀN HÌNH trang sản phẩm VÀ (2) URL gốc để xác định nguồn.
+
+NHIỆM VỤ — đọc trực tiếp từ ảnh và trả về JSON:
+- name: Tên sản phẩm đầy đủ nhìn thấy trong ảnh (tên lớn nhất, nổi bật nhất)
+- price: Giá ĐANG BÁN nhìn thấy trong ảnh — thường màu đỏ/cam, số lớn. Định dạng giữ nguyên (ví dụ: "1.290.000đ")
+- orig: Giá GỐC trong ảnh nếu có (thường bị gạch ngang, màu xám nhạt hơn), để trống nếu không thấy
+- img: URL ảnh sản phẩm (nếu đọc được từ ảnh, nếu không để trống "")
+- source: Tên sàn — đọc từ logo/header trong ảnh hoặc domain của URL
+- commission: Tính 5% của price (ví dụ "1.290.000đ" → "~64.500đ")
+- desc: Mô tả ngắn 1 câu dựa trên thông tin đọc được
+
+ƯU TIÊN: Đọc từ ẢNH là nguồn CHÍNH XÁC NHẤT vì ảnh cho thấy giao diện thực tế.
+Tuyệt đối KHÔNG dùng null. Chỉ trả về JSON thuần, không markdown.`;
 
 // Hàm trích xuất JSON an toàn từ text Gemini trả về
 function extractJSON(text){
@@ -982,21 +1016,7 @@ async function callGemini(parts){
   return d?.candidates?.[0]?.content?.parts?.[0]?.text||'';
 }
 
-async function scanFromUrl(){
-  const url=document.getElementById('product-url').value.trim();
-  if(!url.startsWith('http')){showToast('⚠️ Link không hợp lệ');return;}
-  if(!getKey()){showToast('⚠️ Chưa có API Key');navigate('settings');return;}
-  setScanLoading('Đang đọc trang web...');
-  try{
-    const text=await callGemini([{text:PROMPT+'\nURL sản phẩm: '+url}]);
-    if(!text)throw new Error('Không nhận được phản hồi từ AI');
-    const data=extractJSON(text);
-    if(!data)throw new Error('AI trả về dữ liệu không hợp lệ — thử lại hoặc dùng ảnh chụp');
-    if(data.error)throw new Error(data.error);
-    showPreview(data);
-  }catch(e){clearScanLoading();showToast(`❌ ${e.message.slice(0,70)}`);}
-}
-
+// ===== IMAGE HANDLING =====
 function handleImgSelect(e){const f=e.target.files[0];if(f)loadImg(f);}
 function handleImgDrop(e){const f=e.dataTransfer.files[0];if(f)loadImg(f);}
 function loadImg(file){
@@ -1006,25 +1026,98 @@ function loadImg(file){
   r.onload=ev=>{
     imgBase64=ev.target.result.split(',')[1];
     const t=document.getElementById('img-thumb');
-    t.src=ev.target.result;t.style.display='block';
+    t.src=ev.target.result;
+    document.getElementById('img-preview-wrap').style.display='block';
     document.getElementById('upload-placeholder').style.display='none';
-    document.getElementById('btn-scan-img').style.display='flex';
+    document.getElementById('img-clear-btn').style.display='flex';
+    updateAccuracyBar();
   };
   r.readAsDataURL(file);
 }
+function clearImage(){
+  imgBase64=null;
+  document.getElementById('img-thumb').src='';
+  document.getElementById('img-preview-wrap').style.display='none';
+  document.getElementById('upload-placeholder').style.display='block';
+  document.getElementById('img-clear-btn').style.display='none';
+  document.getElementById('img-input').value='';
+  updateAccuracyBar();
+}
+function updateAccuracyBar(){
+  const url=document.getElementById('product-url').value.trim();
+  const hasUrl=url.startsWith('http');
+  const hasImg=!!imgBase64;
+  const bar=document.getElementById('accuracy-bar');
+  const fill=document.getElementById('accuracy-fill');
+  const label=document.getElementById('accuracy-label');
+  const btn=document.getElementById('btn-scan-label');
+  if(!hasUrl&&!hasImg){bar.style.display='none';btn.textContent='Nhận diện với Gemini AI';return;}
+  bar.style.display='flex';
+  if(hasUrl&&hasImg){
+    fill.style.width='95%';fill.className='h-full rounded-full bg-emerald-500 transition-all duration-500';
+    label.textContent='Độ chính xác cao ✨';label.className='text-xs font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap';
+    btn.textContent='Nhận diện (Link + Ảnh) — Chính xác nhất';
+  }else if(hasImg){
+    fill.style.width='80%';fill.className='h-full rounded-full bg-blue-500 transition-all duration-500';
+    label.textContent='Khá chính xác 👍';label.className='text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap';
+    btn.textContent='Nhận diện từ ảnh';
+  }else{
+    fill.style.width='50%';fill.className='h-full rounded-full bg-amber-400 transition-all duration-500';
+    label.textContent='Thêm ảnh để tốt hơn';label.className='text-xs font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap';
+    btn.textContent='Nhận diện từ link';
+  }
+}
 
-async function scanFromImage(){
-  if(!imgBase64){showToast('⚠️ Chưa chọn ảnh');return;}
+// ===== SCAN COMBINED (link + ảnh) =====
+async function scanCombined(){
+  const url=document.getElementById('product-url').value.trim();
+  const hasUrl=url.startsWith('http');
+  const hasImg=!!imgBase64;
+  if(!hasUrl&&!hasImg){showToast('⚠️ Nhập link sản phẩm trước');return;}
   if(!getKey()){showToast('⚠️ Chưa có API Key');navigate('settings');return;}
-  setScanLoading('Đang phân tích ảnh...');
+
+  const btn=document.getElementById('btn-scan-main');
+  btn.innerHTML=`<span class="spinner"></span>&nbsp;Đang phân tích...`;
+  btn.disabled=true;
+  document.getElementById('scan-skeleton').style.display='block';
+  document.getElementById('preview-section').style.display='none';
+
   try{
-    const text=await callGemini([{text:PROMPT+'\nĐây là ảnh chụp màn hình sản phẩm, hãy đọc và trích xuất thông tin:'},{inline_data:{mime_type:imgMime,data:imgBase64}}]);
+    let parts;
+    if(hasImg&&hasUrl){
+      // Chế độ kết hợp: ảnh là nguồn chính, URL để xác nhận nguồn
+      parts=[
+        {text: PROMPT_WITH_IMAGE + '\n\nURL sản phẩm (để xác định nguồn sàn): ' + url},
+        {inline_data:{mime_type:imgMime,data:imgBase64}}
+      ];
+    }else if(hasImg){
+      // Chỉ ảnh
+      parts=[
+        {text: PROMPT_WITH_IMAGE + '\n\nKhông có URL, hãy đọc toàn bộ từ ảnh.'},
+        {inline_data:{mime_type:imgMime,data:imgBase64}}
+      ];
+    }else{
+      // Chỉ URL
+      parts=[{text: PROMPT_URL_ONLY + '\n\nURL: ' + url}];
+    }
+
+    const text=await callGemini(parts);
     if(!text)throw new Error('Không nhận được phản hồi từ AI');
     const data=extractJSON(text);
-    if(!data)throw new Error('AI trả về dữ liệu không hợp lệ — thử lại');
+    if(!data)throw new Error('AI trả về dữ liệu không hợp lệ — hãy thử thêm ảnh chụp màn hình');
     if(data.error)throw new Error(data.error);
+
+    // Nếu chỉ dùng URL mà thiếu giá → gợi ý thêm ảnh
+    if(!data.price&&hasUrl&&!hasImg){
+      showToast('⚠️ Không đọc được giá — hãy thêm ảnh chụp màn hình để chính xác hơn');
+    }
     showPreview(data);
-  }catch(e){clearScanLoading();showToast(`❌ ${e.message.slice(0,60)}`);}
+  }catch(e){
+    document.getElementById('scan-skeleton').style.display='none';
+    btn.innerHTML=`<span class="material-symbols-outlined">auto_awesome</span>&nbsp;<span id="btn-scan-label">Nhận diện với Gemini AI</span>`;
+    btn.disabled=false;
+    showToast(`❌ ${e.message.slice(0,70)}`);
+  }
 }
 
 function showPreview(data){
@@ -1033,7 +1126,7 @@ function showPreview(data){
   const imgEl=document.getElementById('preview-img');
   const noImg=document.getElementById('preview-no-img');
   if(pendingProduct.img){imgEl.style.backgroundImage=`url('${pendingProduct.img}')`;noImg.style.display='none';}
-  else if(imgBase64&&currentMethod==='image'){imgEl.style.backgroundImage=`url('data:${imgMime};base64,${imgBase64}')`;noImg.style.display='none';}
+  else if(imgBase64){imgEl.style.backgroundImage=`url('data:${imgMime};base64,${imgBase64}')`;noImg.style.display='none';}
   else{imgEl.style.backgroundImage='';noImg.style.display='flex';}
   document.getElementById('preview-source').textContent=pendingProduct.source;
   document.getElementById('preview-name').textContent=pendingProduct.name;
