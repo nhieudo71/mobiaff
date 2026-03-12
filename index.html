@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="theme-color" content="#ee4b2b"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Affiliate"/>
+<link rel="manifest" id="pwa-manifest"/>
+<title>Affiliate Link Manager</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode:"class",
+  theme:{ extend:{ colors:{primary:"#ee4b2b","bg-light":"#f8f6f6","bg-dark":"#221310"}, fontFamily:{display:["Plus Jakarta Sans","sans-serif"]}, borderRadius:{DEFAULT:"0.5rem",lg:"1rem",xl:"1.5rem",full:"9999px"} } }
+};
+</script>
+<style>
+*{box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100dvh}
+.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.fill-icon{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+.screen{display:none}.screen.active{display:flex;flex-direction:column}
+.page{min-height:100dvh;max-width:430px;margin:0 auto;position:relative}
+.tab-btn.active{border-color:#ee4b2b;color:#ee4b2b;font-weight:700}
+.tab-btn{border-bottom:3px solid transparent;color:#64748b}
+.time-btn.active{background:#ee4b2b!important;color:white!important}
+.bar{transition:height .6s cubic-bezier(.4,0,.2,1)}
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.anim-in{animation:fadeSlideUp .35s ease both}
+.product-card{animation:fadeSlideUp .3s ease both}
+.product-card:nth-child(1){animation-delay:.05s}.product-card:nth-child(2){animation-delay:.1s}
+.product-card:nth-child(3){animation-delay:.15s}.product-card:nth-child(4){animation-delay:.2s}
+.product-card:nth-child(5){animation-delay:.25s}.product-card:nth-child(6){animation-delay:.3s}
+.btn-press:active{transform:scale(.97)}
+.spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;z-index:9999;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.toggle{width:44px;height:24px;border-radius:999px;background:#e2e8f0;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.dark .toggle{background:#475569}
+.toggle.on{background:#ee4b2b}
+.toggle::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:white;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle.on::after{left:22px}
+.skeleton{background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%);background-size:400px 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+.dark .skeleton{background:linear-gradient(90deg,#334155 25%,#475569 50%,#334155 75%);background-size:400px 100%}
+#img-input{display:none}
+.method-btn{flex:1;padding:8px;border-radius:10px;font-size:13px;font-weight:600;transition:all .2s;border:2px solid transparent}
+.method-btn.active{background:#ee4b2b;color:white;border-color:#ee4b2b}
+.method-btn:not(.active){background:white;color:#64748b;border-color:#e2e8f0}
+.dark .method-btn:not(.active){background:#1e293b;color:#94a3b8;border-color:#334155}
+.pwa-banner{background:linear-gradient(135deg,#ee4b2b,#c0392b);color:white;border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px}
+.upload-zone{border:2px dashed #e2e8f0;border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s}
+.dark .upload-zone{border-color:#334155}
+.upload-zone:hover,.upload-zone.drag{border-color:#ee4b2b;background:rgba(238,75,43,.04)}
+</style>
+</head>
+<body class="bg-bg-light dark:bg-bg-dark text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<div class="toast" id="toast"></div>
+
+<!-- ===== PRODUCTS ===== -->
+<div class="screen active page" id="screen-products">
+  <header class="sticky top-0 z-20 bg-bg-light/90 dark:bg-bg-dark/90 backdrop-blur-md border-b border-primary/10">
+    <div class="flex items-center p-4 justify-between">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-primary text-2xl">storefront</span>
+        <h2 class="text-lg font-bold">Cửa hàng của tôi</h2>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="showToast('Không có thông báo mới')" class="flex items-center justify-center rounded-full size-10 bg-primary/10 text-primary btn-press"><span class="material-symbols-outlined">notifications</span></button>
+        <button onclick="toggleDark()" class="flex items-center justify-center rounded-full size-10 bg-primary/10 text-primary btn-press"><span class="material-symbols-outlined" id="dark-icon">dark_mode</span></button>
+      </div>
+    </div>
+    <div class="px-4 pb-4">
+      <div class="flex w-full items-center rounded-xl h-12 bg-white dark:bg-slate-800 shadow-sm border border-primary/5">
+        <div class="text-primary flex items-center justify-center pl-4"><span class="material-symbols-outlined">search</span></div>
+        <input id="search-input" oninput="filterProducts()" class="flex-1 border-none bg-transparent focus:ring-0 h-full placeholder:text-slate-400 px-4 text-base outline-none" placeholder="Tìm kiếm sản phẩm..."/>
+      </div>
+    </div>
+    <div class="overflow-x-auto no-scrollbar">
+      <div class="flex border-b border-primary/10 px-4 gap-8 whitespace-nowrap">
+        <button onclick="setTab('all')" class="tab-btn active pb-3 pt-2 text-sm" data-tab="all">Tất cả</button>
+        <button onclick="setTab('active')" class="tab-btn pb-3 pt-2 text-sm" data-tab="active">Đang bán</button>
+        <button onclick="setTab('out')" class="tab-btn pb-3 pt-2 text-sm" data-tab="out">Hết hàng</button>
+        <button onclick="setTab('draft')" class="tab-btn pb-3 pt-2 text-sm" data-tab="draft">Nháp</button>
+      </div>
+    </div>
+  </header>
+  <main class="flex-1">
+    <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4 p-4"></div>
+    <div class="h-24"></div>
+  </main>
+  
+  <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-primary/10 px-2 pb-6 pt-2 z-40">
+    <div class="flex items-end justify-around max-w-lg mx-auto">
+      <button onclick="navigate('home')" class="flex flex-col items-center gap-1 text-slate-400 px-3"><span class="material-symbols-outlined">home</span><p class="text-[10px] font-medium">Trang chủ</p></button>
+      <button class="flex flex-col items-center gap-1 text-primary px-3"><span class="material-symbols-outlined fill-icon">inventory_2</span><p class="text-[10px] font-bold">Sản phẩm</p></button>
+      <button onclick="navigate('add')" class="flex flex-col items-center -mt-5 px-1">
+        <span class="size-14 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center active:scale-95 transition-all border-4 border-white dark:border-slate-900">
+          <span class="material-symbols-outlined text-3xl">add</span>
+        </span>
+        <p class="text-[10px] font-bold text-primary mt-1">Thêm</p>
+      </button>
+      <button onclick="navigate('stats')" class="flex flex-col items-center gap-1 text-slate-400 px-3"><span class="material-symbols-outlined">analytics</span><p class="text-[10px] font-medium">Thống kê</p></button>
+      <button onclick="navigate('settings')" class="flex flex-col items-center gap-1 text-slate-400 px-3"><span class="material-symbols-outlined">person</span><p class="text-[10px] font-medium">Tôi</p></button>
+    </div>
+  </nav>
+</div>
+
+<!-- ===== ADD PRODUCT ===== -->
+<div class="screen page" id="screen-add">
+  <div class="flex items-center p-4 pb-2 justify-between sticky top-0 bg-bg-light/90 dark:bg-bg-dark/90 backdrop-blur-md z-10 border-b border-primary/10">
+    <button onclick="navigate('products')" class="flex size-12 items-center justify-center hover:bg-primary/10 rounded-full transition-colors btn-press"><span class="material-symbols-outlined">arrow_back</span></button>
+    <h2 class="text-lg font-bold flex-1 text-center pr-12">Thêm sản phẩm</h2>
+  </div>
+  <div class="flex flex-col gap-5 p-4 flex-1 overflow-y-auto">
+
+    <!-- API Key warning -->
+    <div id="api-warning" style="display:none" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-3 flex gap-3 items-start">
+      <span class="material-symbols-outlined text-amber-500 text-xl shrink-0 mt-0.5">warning</span>
+      <div>
+        <p class="text-sm font-bold text-amber-700 dark:text-amber-400">Chưa cấu hình Gemini API Key</p>
+        <p class="text-xs text-amber-600 dark:text-amber-500 mt-0.5">Vào <strong>Cài đặt → Gemini API Key</strong> để nhập key trước.</p>
+        <button onclick="navigate('settings')" class="mt-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 underline">Đi đến cài đặt →</button>
+      </div>
+    </div>
+
+    <!-- Method toggle -->
+    <div>
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Phương thức nhận diện AI</p>
+      <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+        <button onclick="setMethod('url')" id="method-url" class="method-btn active"><span class="material-symbols-outlined text-sm" style="vertical-align:-4px">link</span> Từ link URL</button>
+        <button onclick="setMethod('image')" id="method-image" class="method-btn"><span class="material-symbols-outlined text-sm" style="vertical-align:-4px">photo_camera</span> Từ ảnh chụp</button>
+      </div>
+    </div>
+
+    <!-- URL input -->
+    <div id="section-url">
+      <p class="text-base font-semibold pb-2">Dán link sản phẩm</p>
+      <div class="relative">
+        <input id="product-url" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 h-14 placeholder:text-slate-400 p-4 pr-12 text-base outline-none focus:ring-2 focus:ring-primary/50 shadow-sm" placeholder="https://shopee.vn/... lazada.vn/... tiki.vn/..." type="url"/>
+        <button onclick="pasteClipboard()" class="absolute right-3 top-3 text-primary btn-press" title="Dán từ clipboard"><span class="material-symbols-outlined">content_paste</span></button>
+      </div>
+      <div class="flex gap-2 mt-2 flex-wrap">
+        <span class="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-600 font-semibold dark:bg-orange-900/30 dark:text-orange-400">Shopee ✓</span>
+        <span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-600 font-semibold dark:bg-red-900/30 dark:text-red-400">Lazada ✓</span>
+        <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-600 font-semibold dark:bg-blue-900/30 dark:text-blue-400">Tiki ✓</span>
+        <span class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-500 font-semibold dark:bg-slate-700 dark:text-slate-400">& nhiều sàn khác</span>
+      </div>
+      <button id="btn-scan-url" onclick="scanFromUrl()" class="mt-3 w-full h-12 rounded-xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:brightness-110 btn-press shadow-md shadow-primary/20">
+        <span class="material-symbols-outlined text-sm">auto_awesome</span> Nhận diện với Gemini AI
+      </button>
+    </div>
+
+    <!-- Image input -->
+    <div id="section-image" style="display:none">
+      <p class="text-base font-semibold pb-2">Tải ảnh chụp màn hình sản phẩm</p>
+      <input type="file" id="img-input" accept="image/*" onchange="handleImgSelect(event)"/>
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('img-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="event.preventDefault();this.classList.remove('drag');handleImgDrop(event)">
+        <div id="upload-placeholder">
+          <span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 block mb-2">add_photo_alternate</span>
+          <p class="text-sm font-semibold text-slate-500">Nhấn để chọn ảnh</p>
+          <p class="text-xs text-slate-400 mt-1">hoặc kéo thả ảnh • JPG, PNG, WebP</p>
+        </div>
+        <img id="img-thumb" style="display:none;max-height:160px;width:100%;object-fit:contain;border-radius:8px;margin:auto"/>
+      </div>
+      <button id="btn-scan-img" onclick="scanFromImage()" style="display:none" class="mt-3 w-full h-12 rounded-xl bg-primary text-white font-semibold flex items-center justify-center gap-2 hover:brightness-110 btn-press shadow-md shadow-primary/20">
+        <span class="material-symbols-outlined text-sm">auto_awesome</span> Phân tích ảnh với Gemini AI
+      </button>
+    </div>
+
+    <!-- Link affiliate -->
+    <div id="affiliate-link-section" class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined text-emerald-600 text-lg">add_link</span>
+        <p class="text-sm font-bold text-emerald-700 dark:text-emerald-400">Link tiếp thị liên kết</p>
+      </div>
+      <p class="text-xs text-emerald-600 dark:text-emerald-500 mb-3">Dán link affiliate của bạn từ Shopee/Lazada/Accesstrade/... (link này sẽ dùng cho nút "Mua ngay")</p>
+      <div class="relative">
+        <input id="affiliate-url-input" type="url" placeholder="https://shope.ee/... hoặc link affiliate của bạn"
+          class="w-full rounded-lg border border-emerald-200 dark:border-emerald-700 bg-white dark:bg-slate-900 px-3 py-2.5 pr-10 text-sm outline-none focus:ring-2 focus:ring-emerald-400/50 placeholder:text-slate-400"/>
+        <button onclick="pasteAffiliateLink()" class="absolute right-2 top-2 text-emerald-500 btn-press" title="Dán từ clipboard">
+          <span class="material-symbols-outlined text-xl">content_paste</span>
+        </button>
+      </div>
+      <p id="affiliate-url-preview" style="display:none" class="mt-2 text-xs text-emerald-600 dark:text-emerald-400 truncate font-mono bg-emerald-100 dark:bg-emerald-900/40 px-2 py-1 rounded"></p>
+    </div>
+
+    <!-- Skeleton -->
+    <div id="scan-skeleton" style="display:none" class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+      <div class="skeleton w-full" style="aspect-ratio:1"></div>
+      <div class="p-4 flex flex-col gap-3">
+        <div class="skeleton h-4 rounded" style="width:60%"></div>
+        <div class="skeleton h-5 rounded w-full"></div>
+        <div class="skeleton h-5 rounded" style="width:75%"></div>
+        <div class="skeleton h-7 rounded" style="width:40%"></div>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div id="preview-section" style="display:none">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Xem trước</h3>
+        <span class="text-xs font-bold px-2 py-1 bg-primary/10 text-primary rounded-full flex items-center gap-1"><span class="material-symbols-outlined text-xs">auto_awesome</span> Gemini AI</span>
+      </div>
+      <div class="rounded-xl shadow-lg bg-white dark:bg-slate-900 overflow-hidden border border-slate-100 dark:border-slate-800 anim-in">
+        <div id="preview-img" class="w-full bg-center bg-no-repeat bg-cover bg-slate-100 dark:bg-slate-800 relative" style="aspect-ratio:1">
+          <div id="preview-no-img" style="display:none" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800">
+            <span class="material-symbols-outlined text-4xl text-slate-300">image_not_supported</span>
+            <p class="text-xs text-slate-400">Không có ảnh — Nhấn Sửa để thêm URL ảnh</p>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2 p-4">
+          <div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">shopping_bag</span><p id="preview-source" class="text-slate-500 dark:text-slate-400 text-sm font-medium"></p></div>
+          <p id="preview-name" class="text-base font-bold leading-snug"></p>
+          <p id="preview-desc" class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2" style="display:none"></p>
+          <div class="flex items-center justify-between mt-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div>
+              <p id="preview-orig" class="text-slate-400 text-xs line-through"></p>
+              <p id="preview-price" class="text-primary text-xl font-bold leading-none"></p>
+            </div>
+            <button onclick="toggleEdit()" class="flex items-center gap-2 rounded-lg h-10 px-4 bg-primary/10 text-primary hover:bg-primary/20 text-sm font-semibold"><span class="material-symbols-outlined text-sm">edit</span> Sửa</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit form -->
+      <div id="edit-section" style="display:none" class="mt-3 bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-700 anim-in flex flex-col gap-3">
+        <div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 block">Tên sản phẩm</label>
+          <input id="edit-name" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"/></div>
+        <div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 block">URL ảnh sản phẩm</label>
+          <input id="edit-img" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40" placeholder="https://..."/></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 block">Giá gốc</label>
+            <input id="edit-orig" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"/></div>
+          <div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 block">Giá KM</label>
+            <input id="edit-price" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"/></div>
+        </div>
+        <div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 block">Hoa hồng ước tính</label>
+          <input id="edit-commission" class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40" placeholder="VD: ~50.000đ"/></div>
+        <button onclick="applyEdit()" class="w-full h-10 rounded-lg bg-primary text-white font-semibold text-sm btn-press">Áp dụng</button>
+      </div>
+
+      <div class="bg-primary/5 rounded-xl p-4 border border-primary/10 flex items-center gap-4 mt-4">
+        <div class="bg-primary text-white size-10 rounded-full flex items-center justify-center shrink-0"><span class="material-symbols-outlined">payments</span></div>
+        <div><p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Hoa hồng ước tính</p><p id="preview-commission" class="font-bold text-base"></p></div>
+      </div>
+
+      <div class="mt-4">
+        <p class="text-base font-semibold mb-3">Tùy chọn hiển thị</p>
+        <div class="flex gap-2 flex-wrap">
+          <button id="tag-hot" onclick="toggleTag('hot')" class="tag-btn px-3 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm font-medium flex items-center gap-2 btn-press"><span class="material-symbols-outlined text-sm">sell</span> Gắn thẻ Hot</button>
+          <button id="tag-top" onclick="toggleTag('top')" class="tag-btn px-3 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm font-medium flex items-center gap-2 btn-press"><span class="material-symbols-outlined text-sm">star</span> Ưu tiên đầu trang</button>
+          <button id="tag-draft" onclick="toggleTag('draft')" class="tag-btn px-3 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-sm font-medium flex items-center gap-2 btn-press"><span class="material-symbols-outlined text-sm">edit_note</span> Lưu nháp</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-4 bg-bg-light dark:bg-bg-dark border-t border-slate-100 dark:border-slate-800 shrink-0">
+    <button onclick="saveProduct()" class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl h-14 bg-primary text-white text-lg font-bold shadow-lg shadow-primary/30 hover:brightness-110 active:scale-[.98] btn-press">
+      <span class="material-symbols-outlined">save</span><span>Lưu sản phẩm</span>
+    </button>
+  </div>
+  <div class="h-4 bg-bg-light dark:bg-bg-dark"></div>
+</div>
+
+<!-- ===== STATS ===== -->
+<div class="screen page" id="screen-stats">
+  <header class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
+    <h1 class="text-xl font-bold tracking-tight">Thống kê chi tiết</h1>
+    <button onclick="showToast('Không có thông báo mới')" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"><span class="material-symbols-outlined">notifications</span></button>
+  </header>
+  <div class="bg-white dark:bg-slate-900 px-4 py-2 border-b border-slate-200 dark:border-slate-800">
+    <div class="flex gap-3 overflow-x-auto no-scrollbar py-2">
+      <button onclick="setTimeRange(this,'today')" class="time-btn active whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Hôm nay</button>
+      <button onclick="setTimeRange(this,'week')" class="time-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Tuần này</button>
+      <button onclick="setTimeRange(this,'month')" class="time-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Tháng này</button>
+      <button onclick="setTimeRange(this,'year')" class="time-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Năm nay</button>
+    </div>
+  </div>
+  <div class="overflow-y-auto flex-1 pb-24">
+    <div class="grid grid-cols-2 gap-4 p-4">
+      <div class="flex flex-col gap-2 rounded-xl p-5 bg-primary/10 border border-primary/20"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Hoa hồng dự kiến</p><p id="stat-commission" class="text-primary text-2xl font-bold">12.500.000đ</p><div class="flex items-center gap-1 text-emerald-600 text-sm font-bold"><span class="material-symbols-outlined text-sm">trending_up</span><span>15.4%</span></div></div>
+      <div class="flex flex-col gap-2 rounded-xl p-5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Tổng lượt click</p><p id="stat-clicks" class="text-2xl font-bold">4.820</p><div class="flex items-center gap-1 text-primary text-sm font-bold"><span class="material-symbols-outlined text-sm">trending_down</span><span>2.1%</span></div></div>
+      <div class="flex flex-col gap-2 rounded-xl p-5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Đơn hàng</p><p id="stat-orders" class="text-2xl font-bold">277</p><div class="flex items-center gap-1 text-emerald-600 text-sm font-bold"><span class="material-symbols-outlined text-sm">trending_up</span><span>8.3%</span></div></div>
+      <div class="flex flex-col gap-2 rounded-xl p-5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Sản phẩm</p><p id="stat-products-count" class="text-2xl font-bold">0</p><div class="flex items-center gap-1 text-emerald-600 text-sm font-bold"><span class="material-symbols-outlined text-sm">trending_up</span><span>Đang hoạt động</span></div></div>
+    </div>
+    <div class="px-4 py-2">
+      <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="flex justify-between items-center mb-6"><div><p class="text-slate-500 text-sm">Lượt click theo ngày</p><p class="text-2xl font-bold">842 <span class="text-sm font-normal text-emerald-500">+12%</span></p></div><span class="material-symbols-outlined text-slate-400">bar_chart</span></div>
+        <div id="chart-bars" class="grid grid-cols-7 gap-2 items-end h-40"></div>
+      </div>
+    </div>
+    <div class="p-4 space-y-4">
+      <div class="flex justify-between items-center"><h2 class="text-lg font-bold">Sản phẩm chuyển đổi cao</h2><button onclick="navigate('products')" class="text-primary text-sm font-bold">Xem tất cả</button></div>
+      <div id="top-products" class="space-y-3"></div>
+    </div>
+  </div>
+  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-3">
+    <div class="flex items-center justify-between max-w-md mx-auto">
+      <button onclick="navigate('home')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">home</span><span class="text-[10px] font-bold">Trang chủ</span></button>
+      <button onclick="navigate('products')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">inventory_2</span><span class="text-[10px] font-bold">Sản phẩm</span></button>
+      <button class="flex flex-col items-center gap-1 text-primary"><span class="material-symbols-outlined fill-icon">analytics</span><span class="text-[10px] font-bold">Thống kê</span></button>
+      <button onclick="navigate('settings')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">person</span><span class="text-[10px] font-bold">Cá nhân</span></button>
+    </div>
+  </nav>
+</div>
+
+<!-- ===== SETTINGS ===== -->
+<div class="screen page" id="screen-settings">
+  <header class="flex items-center bg-bg-light/90 dark:bg-bg-dark/90 p-4 sticky top-0 z-10 border-b border-primary/10 backdrop-blur-md">
+    <button onclick="navigate('products')" class="flex size-10 items-center justify-center cursor-pointer btn-press"><span class="material-symbols-outlined">arrow_back</span></button>
+    <h2 class="text-lg font-bold flex-1 text-center pr-10">Cài đặt</h2>
+  </header>
+  <main class="flex-1 overflow-y-auto pb-28">
+
+    <!-- ===== PWA INSTALL ===== -->
+    <section class="p-4 pb-0">
+      <h3 class="text-xs font-bold uppercase tracking-widest opacity-60 mb-3">Cài đặt ứng dụng (PWA)</h3>
+
+      <!-- Android/Chrome install banner -->
+      <div id="pwa-install-card" style="display:none" class="pwa-banner mb-3">
+        <div class="size-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-white text-2xl">install_mobile</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-base">Cài đặt như app thật</p>
+          <p class="text-white/80 text-xs mt-0.5 truncate">Thêm vào màn hình chính để dùng offline</p>
+        </div>
+        <button id="pwa-install-btn" onclick="installPWA()" class="shrink-0 bg-white text-primary font-bold text-sm px-4 py-2 rounded-xl btn-press hover:bg-white/90">Cài ngay</button>
+      </div>
+
+      <!-- iOS Safari guide -->
+      <div id="pwa-ios-card" style="display:none" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 mb-3">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="size-10 bg-blue-500 rounded-xl flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-white">phone_iphone</span></div>
+          <div><p class="font-bold text-blue-800 dark:text-blue-300">Cài trên iPhone / iPad</p><p class="text-xs text-blue-600 dark:text-blue-400">Mở bằng Safari để cài đặt</p></div>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300"><span class="size-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span><span>Mở trang này bằng <strong>Safari</strong></span></div>
+          <div class="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300"><span class="size-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span><span>Nhấn nút <strong>Chia sẻ</strong> ở thanh dưới</span></div>
+          <div class="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300"><span class="size-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span><span>Chọn <strong>"Thêm vào màn hình chính"</strong></span></div>
+        </div>
+      </div>
+
+      <!-- Đã cài -->
+      <div id="pwa-installed-card" style="display:none" class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 flex items-center gap-3 mb-3">
+        <span class="material-symbols-outlined text-emerald-500 text-2xl">check_circle</span>
+        <div><p class="font-bold text-emerald-700 dark:text-emerald-400">Đã cài đặt ứng dụng</p><p class="text-xs text-emerald-600 dark:text-emerald-500">Đang chạy ở chế độ PWA</p></div>
+      </div>
+
+      <!-- Chrome hướng dẫn (không hỗ trợ beforeinstallprompt) -->
+      <div id="pwa-manual-card" style="display:none" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 mb-3">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="size-10 bg-slate-500 rounded-xl flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-white">desktop_windows</span></div>
+          <div><p class="font-bold">Cài trên máy tính (Chrome)</p><p class="text-xs text-slate-500">Cài từ thanh địa chỉ</p></div>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300"><span class="size-5 bg-slate-400 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span><span>Mở file HTML trong <strong>Chrome</strong></span></div>
+          <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300"><span class="size-5 bg-slate-400 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span><span>Nhấn icon <strong>⊕</strong> ở cuối thanh địa chỉ</span></div>
+          <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300"><span class="size-5 bg-slate-400 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span><span>Nhấn <strong>"Cài đặt"</strong> trong hộp thoại hiện ra</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== GEMINI API KEY ===== -->
+    <section class="mt-4">
+      <h3 class="text-xs font-bold uppercase tracking-widest px-6 pb-2 opacity-60">AI & Nhận diện sản phẩm</h3>
+      <div class="flex flex-col px-4">
+        <div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="size-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-primary">auto_awesome</span></div>
+            <div class="flex-1 min-w-0"><p class="font-semibold text-base">Gemini API Key</p><p class="text-xs mt-0.5" id="api-key-status">Chưa cấu hình</p></div>
+            <span id="api-key-dot" class="size-3 rounded-full bg-slate-300 shrink-0"></span>
+          </div>
+          <div class="relative">
+            <input id="api-key-input" type="password" placeholder="AIzaSy..." class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2.5 pr-10 text-sm outline-none focus:ring-2 focus:ring-primary/40 font-mono"/>
+            <button onclick="toggleKeyVis()" class="absolute right-2 top-2 text-slate-400 hover:text-primary btn-press"><span id="key-eye" class="material-symbols-outlined text-xl">visibility</span></button>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button onclick="saveApiKey()" class="flex-1 h-10 rounded-lg bg-primary text-white font-semibold text-sm btn-press">Lưu key</button>
+            <button onclick="testApiKey()" class="h-10 px-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500 font-semibold text-sm btn-press border border-blue-200 dark:border-blue-800">Test</button>
+            <button onclick="clearApiKey()" class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 text-sm btn-press">Xóa</button>
+          </div>
+          <a href="https://aistudio.google.com/apikey" target="_blank" class="flex items-center gap-1 mt-3 text-xs text-blue-500 hover:underline font-medium">
+            <span class="material-symbols-outlined text-sm">open_in_new</span> Lấy API Key miễn phí tại aistudio.google.com
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Account -->
+    <section class="mt-4 px-4">
+      <div class="flex flex-col items-center gap-4 bg-white dark:bg-slate-800/50 rounded-2xl p-5">
+        <div class="relative">
+          <div class="bg-center bg-no-repeat bg-cover rounded-full w-20 h-20 border-4 border-primary/20 bg-slate-200 dark:bg-slate-700" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuAQ1nPHMYG7dvJt2rbnhnSuqrTRSMtYIBayhf_28UGS1HdbtaVIbQk_2A0bERzuDYMxBk6LT1jH_8OcIE97Mfv6UNMhHmLTMcf3kgnF4ed74f_M9Jov90tOyvV9eN28UNR-JKgYslTVwLI9vhNp023ZZ8O-CClugNjoOcOWLZnXTf1PWTObX62aVGc3ByDHfCcWY5TQGG4l7AC4IM5HcZOHD51OV4GqK6JG0HLziDx8Vn70jWxPtWqUKp8vJJzYHBdBT4Tyom7Ht-D1')"></div>
+          <button onclick="showToast('Tính năng sắp ra mắt')" class="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full border-2 border-bg-light dark:border-bg-dark btn-press"><span class="material-symbols-outlined text-sm block">edit</span></button>
+        </div>
+        <div class="text-center"><p class="text-lg font-bold">Tài khoản Affiliate</p><p class="text-primary/70 text-sm font-medium mt-0.5">Chưa kết nối dịch vụ</p></div>
+        <div class="flex w-full flex-col gap-2">
+          <button onclick="showToast('⚠️ Tính năng sắp ra mắt')" class="flex w-full items-center justify-center gap-2 rounded-xl h-11 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold shadow-sm hover:bg-slate-50 btn-press">
+            <svg class="w-4 h-4" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.4 4 24 4 16.3 4 9.6 8.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.4 35.4 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8H6.4C9.6 35.4 16.3 40 24 40v4z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.1-2.2 3.9-4 5.1l6.3 5.3C41.7 35.6 44 30.2 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+            Đăng nhập với Google
+          </button>
+          <button onclick="showToast('⚠️ Tính năng sắp ra mắt')" class="flex w-full items-center justify-center gap-2 rounded-xl h-11 bg-primary text-white text-sm font-bold shadow-md shadow-primary/20 hover:opacity-90 btn-press"><span class="material-symbols-outlined text-base">database</span> Kết nối Firebase</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Appearance -->
+    <section class="mt-3">
+      <h3 class="text-xs font-bold uppercase tracking-widest px-6 pb-2 pt-3 opacity-60">Giao diện</h3>
+      <div class="px-4">
+        <div class="flex items-center gap-4 bg-white dark:bg-slate-800/50 p-4 rounded-xl">
+          <div class="text-primary flex items-center justify-center rounded-lg bg-primary/10 size-10"><span class="material-symbols-outlined">dark_mode</span></div>
+          <div class="flex-1"><p class="font-semibold">Chế độ tối</p><p class="text-slate-500 text-xs">Giao diện nền tối</p></div>
+          <div id="dark-toggle" onclick="toggleDark()" class="toggle on"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data -->
+    <section class="mt-3">
+      <h3 class="text-xs font-bold uppercase tracking-widest px-6 pb-2 pt-3 opacity-60">Dữ liệu & Bảo mật</h3>
+      <div class="flex flex-col px-4 gap-1">
+        <button onclick="exportData()" class="flex items-center gap-4 bg-white dark:bg-slate-800/50 p-4 rounded-xl hover:bg-primary/5 transition-colors group btn-press">
+          <div class="text-primary flex items-center justify-center rounded-lg bg-primary/10 size-10 group-hover:bg-primary group-hover:text-white transition-colors"><span class="material-symbols-outlined">download</span></div>
+          <div class="flex flex-col items-start flex-1"><p class="font-semibold">Xuất dữ liệu (JSON)</p><p class="text-slate-500 text-xs">Tải về file backup sản phẩm</p></div>
+          <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+        </button>
+        <button onclick="document.getElementById('import-input').click()" class="flex items-center gap-4 bg-white dark:bg-slate-800/50 p-4 rounded-xl hover:bg-primary/5 transition-colors group btn-press">
+          <div class="text-primary flex items-center justify-center rounded-lg bg-primary/10 size-10 group-hover:bg-primary group-hover:text-white transition-colors"><span class="material-symbols-outlined">upload</span></div>
+          <div class="flex flex-col items-start flex-1"><p class="font-semibold">Nhập dữ liệu (JSON)</p><p class="text-slate-500 text-xs">Khôi phục từ file backup</p></div>
+          <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+        </button>
+        <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)"/>
+        <button onclick="confirmDeleteAll()" class="flex items-center gap-4 bg-white dark:bg-slate-800/50 p-4 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors group mt-3 btn-press">
+          <div class="text-red-600 flex items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/20 size-10 group-hover:bg-red-600 group-hover:text-white transition-colors"><span class="material-symbols-outlined">delete_forever</span></div>
+          <div class="flex flex-col items-start flex-1"><p class="text-red-600 font-semibold">Xóa tất cả dữ liệu</p><p class="text-red-400 text-xs">Hành động này không thể hoàn tác</p></div>
+          <span class="material-symbols-outlined text-red-300">warning</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- App info -->
+    <section class="mt-3 mb-24">
+      <h3 class="text-xs font-bold uppercase tracking-widest px-6 pb-2 pt-3 opacity-60">Thông tin ứng dụng</h3>
+      <div class="flex flex-col px-4 gap-1">
+        <div class="flex items-center gap-4 p-4 bg-white dark:bg-slate-800/50 rounded-xl">
+          <div class="text-slate-500 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 size-10"><span class="material-symbols-outlined">info</span></div>
+          <div class="flex-1"><p class="font-semibold">Phiên bản</p><p class="text-slate-500 text-xs">v3.2.0 — Gemini 2.5 Flash + PWA</p></div>
+        </div>
+        <div class="flex items-center gap-4 p-4 bg-white dark:bg-slate-800/50 rounded-xl">
+          <div class="text-slate-500 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 size-10"><span class="material-symbols-outlined">storage</span></div>
+          <div class="flex-1"><p class="font-semibold">Dung lượng</p><p id="storage-info" class="text-slate-500 text-xs">Đang tính...</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="fixed bottom-0 left-0 right-0 border-t border-slate-200 dark:border-slate-800 bg-bg-light/90 dark:bg-bg-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-40">
+    <div class="flex items-center justify-around max-w-lg mx-auto">
+      <button onclick="navigate('home')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">home</span><p class="text-[10px] font-medium uppercase tracking-wider">Trang chủ</p></button>
+      <button onclick="navigate('products')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">inventory_2</span><p class="text-[10px] font-medium uppercase tracking-wider">Sản phẩm</p></button>
+      <button onclick="navigate('stats')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">bar_chart</span><p class="text-[10px] font-medium uppercase tracking-wider">Thống kê</p></button>
+      <button class="flex flex-col items-center gap-1 text-primary"><span class="material-symbols-outlined fill-icon">settings</span><p class="text-[10px] font-bold uppercase tracking-wider">Cài đặt</p></button>
+    </div>
+  </nav>
+</div>
+
+<!-- MODAL: XEM CHI TIẾT -->
+<div id="detail-modal" style="display:none" class="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-0">
+  <div class="bg-white dark:bg-slate-900 rounded-t-3xl w-full max-w-lg anim-in overflow-hidden" style="max-height:90dvh;overflow-y:auto">
+    <div class="relative">
+      <div id="dm-img" class="w-full bg-slate-100 dark:bg-slate-800 bg-center bg-cover bg-no-repeat" style="height:260px"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+      <button onclick="closeDetailModal()" class="absolute top-4 right-4 size-10 bg-black/40 text-white rounded-full flex items-center justify-center backdrop-blur-sm btn-press">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      <div class="absolute bottom-4 left-4 flex gap-2">
+        <span id="dm-tag" style="display:none" class="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">HOT</span>
+        <span id="dm-status-badge" class="bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full">Đang bán</span>
+      </div>
+    </div>
+    <div class="p-5 flex flex-col gap-4">
+      <div>
+        <p id="dm-source" class="text-primary text-xs font-bold uppercase tracking-wider mb-1"></p>
+        <h2 id="dm-name" class="text-lg font-bold leading-snug"></h2>
+      </div>
+      <div class="flex items-end gap-3">
+        <p id="dm-price" class="text-primary text-2xl font-bold"></p>
+        <p id="dm-orig" class="text-slate-400 text-sm line-through pb-0.5"></p>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 text-center">
+          <p class="text-slate-400 text-xs mb-1">Hoa hồng</p>
+          <p id="dm-commission" class="text-primary font-bold text-sm"></p>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 text-center">
+          <p class="text-slate-400 text-xs mb-1">Lượt click</p>
+          <p id="dm-clicks" class="font-bold text-sm"></p>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 text-center">
+          <p class="text-slate-400 text-xs mb-1">Đơn hàng</p>
+          <p id="dm-orders" class="font-bold text-sm"></p>
+        </div>
+      </div>
+      <div id="dm-buy-wrap" style="display:none">
+        <button id="dm-buy-btn" class="w-full h-12 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 btn-press shadow-md shadow-primary/20 mb-3">
+          <span class="material-symbols-outlined text-sm">shopping_cart</span> Mua ngay
+        </button>
+      </div>
+      <div class="flex gap-3 pt-1">
+        <button id="dm-copy-btn" class="flex-1 h-12 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center gap-2 btn-press">
+          <span class="material-symbols-outlined text-sm">link</span> Sao chép
+        </button>
+        <button id="dm-edit-btn" class="flex-1 h-12 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-xl font-bold flex items-center justify-center gap-1 btn-press">
+          <span class="material-symbols-outlined text-sm">edit</span> Sửa
+        </button>
+        <button id="dm-delete-btn" class="h-12 px-4 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-xl font-bold flex items-center justify-center btn-press">
+          <span class="material-symbols-outlined text-sm">delete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CHỈNH SỬA SẢN PHẨM -->
+<div id="edit-modal" style="display:none" class="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-0">
+  <div class="bg-white dark:bg-slate-900 rounded-t-3xl w-full max-w-lg anim-in" style="max-height:90dvh;overflow-y:auto">
+    <div class="flex items-center justify-between p-5 pb-3 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900">
+      <h2 class="text-lg font-bold">Chỉnh sửa sản phẩm</h2>
+      <button onclick="closeEditModal()" class="size-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 btn-press"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="p-5 flex flex-col gap-4">
+      <div>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Tên sản phẩm</label>
+        <input id="em-name" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40"/>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">URL ảnh sản phẩm</label>
+        <input id="em-img" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40" placeholder="https://..."/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Giá gốc</label>
+          <input id="em-orig" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40" placeholder="0đ"/>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Giá bán</label>
+          <input id="em-price" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40" placeholder="0đ"/>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Hoa hồng ước tính</label>
+        <input id="em-commission" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40" placeholder="~0đ"/>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Link tiếp thị liên kết (Affiliate)</label>
+        <div class="relative">
+          <input id="em-affiliate" type="url" placeholder="https://shope.ee/... hoặc link affiliate của bạn"
+            class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 pr-10 text-sm outline-none focus:ring-2 focus:ring-emerald-400/50"/>
+          <span class="absolute right-3 top-3 text-emerald-500 material-symbols-outlined text-lg">add_link</span>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Trạng thái</label>
+        <select id="em-status" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40">
+          <option value="active">Đang bán</option>
+          <option value="draft">Nháp</option>
+          <option value="out">Hết hàng</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Thẻ</label>
+        <div class="flex gap-2">
+          <button id="em-tag-hot" onclick="toggleEditTag('hot')" class="flex-1 h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold flex items-center justify-center gap-1 btn-press transition-colors">
+            <span class="material-symbols-outlined text-sm">sell</span> HOT
+          </button>
+        </div>
+      </div>
+      <div class="flex gap-3 pt-1 pb-2">
+        <button onclick="closeEditModal()" class="flex-1 h-12 rounded-xl border border-slate-200 dark:border-slate-700 font-semibold btn-press">Huỷ</button>
+        <button onclick="saveEditProduct()" class="flex-1 h-12 rounded-xl bg-primary text-white font-bold btn-press shadow-md shadow-primary/20">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: XÁC NHẬN XÓA SẢN PHẨM -->
+<div id="delete-product-modal" style="display:none" class="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-4">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm p-6 anim-in">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="size-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-red-500">delete</span>
+      </div>
+      <div>
+        <h3 class="text-base font-bold">Xóa sản phẩm</h3>
+        <p class="text-slate-400 text-xs mt-0.5">Hành động này không thể hoàn tác</p>
+      </div>
+    </div>
+    <p id="delete-product-name" class="text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 rounded-xl p-3 mb-5 line-clamp-2"></p>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteProductModal()" class="flex-1 h-12 rounded-xl border border-slate-200 dark:border-slate-700 font-semibold btn-press">Huỷ</button>
+      <button onclick="confirmDeleteProduct()" class="flex-1 h-12 rounded-xl bg-red-600 text-white font-semibold btn-press">Xóa sản phẩm</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirm-modal" style="display:none" class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm p-6 anim-in">
+    <h3 class="text-lg font-bold mb-2">Xác nhận xóa</h3>
+    <p class="text-slate-500 text-sm mb-6">Tất cả dữ liệu sản phẩm sẽ bị xóa vĩnh viễn. Bạn có chắc không?</p>
+    <div class="flex gap-3">
+      <button onclick="closeModal()" class="flex-1 h-12 rounded-xl border border-slate-200 dark:border-slate-700 font-semibold btn-press">Huỷ</button>
+      <button onclick="deleteAll()" class="flex-1 h-12 rounded-xl bg-red-600 text-white font-semibold btn-press">Xóa tất cả</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================================================================
+// CONFIG — Có thể hardcode API Key hoặc nhập qua Settings
+// =================================================================
+const HARDCODED_KEY = ""; // Tùy chọn: "AIzaSyBxxx..."
+// =================================================================
+
+// ===== DATA =====
+let products = JSON.parse(localStorage.getItem('affiliate_products') || '[]');
+if (!products.length) {
+  products = [
+    {id:1,name:"Apple iPhone 15 Pro Max 256GB - Chính hãng VN/A",price:"29.490.000đ",orig:"32.000.000đ",img:"https://lh3.googleusercontent.com/aida-public/AB6AXuC3twYpg_PC00c9_PcRce-JSwFLiYM7uUZE9wklr9JWVZABpamhtp552mkyMdZzEhCBNmDUkz9JBZgY8JEycAEOdLGsXTep_xZz9asTHfCLbtGnnEAh-sQScpCd8QvwSIXu-TVSqHkHPRADpAERfZPFTT1ImGM7SN1T7iH4qYh8RoTcR1WMoTE0bdqj1w2nc5a2Q8eeHShm9VPW6LqP6Bju0j096sIM9kF9yeo7-z-LoGX3mVc7XZAg7B-gW-Hda3JqTeeCfpIbiJpm",tag:"hot",status:"active",commission:"294.900đ",clicks:820,orders:28},
+    {id:2,name:"Samsung Galaxy S24 Ultra 12GB/256GB AI Phone",price:"23.990.000đ",orig:"",img:"https://lh3.googleusercontent.com/aida-public/AB6AXuDqovY30kWEmkyOVg34VMPlRIdKYg6SQ3xpnsnGKjOYq_KqiCu_qfz7gEVJBT2V6lFGiz78gyl85nHDkPD5A1PJufKIhTnpHqlOBkhu7sCLfU7IAmyskySDHGprUrg1wU87pZLUtKGQ6Z19M1Ptm1bN-sd_v74lGdo8Usl-Au6d2R-EtkIYlCNJVstVkTW_nbt806BJIkKsVdkQGGSv-YoJYDiMTAzKZU12huJnLmAxFLUWvCr-JsMdaFjvWVe1eJfSUXSokg8_CoKN",tag:"",status:"active",commission:"239.900đ",clicks:650,orders:21},
+    {id:3,name:"Tai nghe chống ồn Sony WH-1000XM5",price:"6.490.000đ",orig:"7.990.000đ",img:"https://lh3.googleusercontent.com/aida-public/AB6AXuBgmWDyQDTkPc3XhTu-q-sypOV8_AtxItPEUInaKx2QLgWLLKGh7AkiVyhR6S8xssJ-VbDQqbbfdfik76_RiHcDmShslyHFipjts6FYkxxx69M5GQObCtN1n7Ga2rWuyRWaq58XhA-4D0TMMxlVYZak59bypTYZ8lccldyQwotynLR-a6fEwf4exOIyj83wFEeVMMUyfkfzYf0SatYSXNo8Q6VB8dWKmeRQbZJWIniZYsLAQQ0sbA_EscTVuuIKkDgnNHun8G5h-Db6",tag:"",status:"active",commission:"64.900đ",clicks:480,orders:18},
+    {id:4,name:"iPad Air M2 11 inch (2024) Wi-Fi 128GB",price:"16.490.000đ",orig:"",img:"https://lh3.googleusercontent.com/aida-public/AB6AXuC3y2w6Q8PYoy5EDUNtHwOjKY8cnAeAZh5UtnGdRdInqamW3v1VAOtMGetZFiRyrDGn1y-SZpQHDBwSxlxinfZEfVEHkxmxj7OEfqM1M1R4W4zTWvWR70j8JzNuSjrxZmIlq6DblIKoD_KDv2MtsOplW8BzKwITP3Uhf8mozMN7Mvu2FYEudtBczByXrxc41oPhPubzipLvE9j5eTKfjl-YwuAgK9I6Gc2dGtVCsifyhUVsvH5K3MDDDxNzypF7-cqLyn9EfZxRfrOO",tag:"",status:"active",commission:"164.900đ",clicks:310,orders:12},
+    {id:5,name:"Đồng hồ thông minh Watch Series 9 GPS 45mm",price:"9.290.000đ",orig:"10.500.000đ",img:"https://lh3.googleusercontent.com/aida-public/AB6AXuD6IW6EwicCQNzGCmBAnTKFKgkXRJPtBhg3dNXcx37-LDErAUcPGYXSGOlVTyhXAR8iqjC8BGE_oam73AQeeeB_Ugm2VUjY2vpwoS4y3AwEjl4891NTSTFpenyBx5JNfAUycE9_oo2J7H6_9LYivnvvyQLb5ZsnugtNYbHW0EC-Oqe4rHCZx0uKv6rvuXeCiYKKKIFqmUX9yxvy32lHxdQxoeqwokxU3TJqK8r_T-rB56qI9UMgXeQxs3i-AsfHZJ6Dvz3ECNzwaYMN",tag:"",status:"active",commission:"92.900đ",clicks:280,orders:9},
+    {id:6,name:"Tai nghe Marshall Major IV Bluetooth",price:"3.490.000đ",orig:"4.200.000đ",img:"https://lh3.googleusercontent.com/aida-public/AB6AXuBogIu7OyOZ-pssioH7SvsGs2H4QD_L6si3Vrd988JKxofDL7Ui6InHW8edaAomxXXxm8WX6aIFPXKIbfbkWXly3ckpUIyN0GEISaLvdfqg8S9bS09wNCCj3-pJqJVlsAaemBUdvXg3L30W4eg9Ylf2jjyDYvrdLfhfMDxDVwP7z3CetzcRyVmhpYU4bGlUN6byd0yLSWbLZZBribGQE7Mm4RG56LttxZrnKkhcoi7EN_DuviBlGUW3rNKuwPpqUch47EdMAGSs7iSN",tag:"",status:"draft",commission:"34.900đ",clicks:150,orders:4},
+  ];
+  saveData();
+}
+
+let currentTab='all', pendingProduct=null, activeTags=[], currentMethod='url';
+let imgBase64=null, imgMime='image/jpeg', deferredPWA=null;
+
+function saveData(){localStorage.setItem('affiliate_products',JSON.stringify(products))}
+function getKey(){return HARDCODED_KEY||localStorage.getItem('gemini_api_key')||''}
+
+// ===== PWA MANIFEST =====
+(function(){
+  const m={name:"Affiliate Link Manager",short_name:"Affiliate",start_url:"./",display:"standalone",background_color:"#221310",theme_color:"#ee4b2b",
+    icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23ee4b2b'/%3E%3Ctext x='96' y='130' text-anchor='middle' font-size='110'%3E🛒%3C/text%3E%3C/svg%3E",sizes:"192x192",type:"image/svg+xml"}]};
+  const url=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/json'}));
+  document.getElementById('pwa-manifest').href=url;
+})();
+
+// ===== PWA EVENTS =====
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPWA=e;
+  document.getElementById('pwa-install-card').style.display='flex';
+  document.getElementById('pwa-manual-card').style.display='none';
+});
+window.addEventListener('appinstalled',()=>{
+  deferredPWA=null;
+  document.getElementById('pwa-install-card').style.display='none';
+  document.getElementById('pwa-installed-card').style.display='flex';
+  showToast('🎉 Đã cài đặt ứng dụng thành công!');
+});
+
+function installPWA(){
+  if(!deferredPWA)return;
+  deferredPWA.prompt();
+  deferredPWA.userChoice.then(r=>{if(r.outcome==='accepted')showToast('🎉 Đang cài đặt...');deferredPWA=null;});
+}
+
+function checkPWAState(){
+  const isStandalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  if(isStandalone){
+    document.getElementById('pwa-installed-card').style.display='flex';
+    document.getElementById('pwa-install-card').style.display='none';
+    document.getElementById('pwa-ios-card').style.display='none';
+    document.getElementById('pwa-manual-card').style.display='none';
+  } else if(isIOS){
+    document.getElementById('pwa-ios-card').style.display='block';
+    document.getElementById('pwa-manual-card').style.display='none';
+  } else if(!deferredPWA){
+    // Show manual guide if no prompt available yet
+    document.getElementById('pwa-manual-card').style.display='block';
+  }
+}
+
+// ===== NAVIGATION =====
+function navigate(s){
+  if(s==='home')s='products';
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  const t=document.getElementById('screen-'+s);
+  if(t){t.classList.add('active');window.scrollTo(0,0);}
+  if(s==='products')renderProducts();
+  if(s==='stats')renderStats();
+  if(s==='settings'){updateStorageInfo();checkPWAState();loadKeyToInput();}
+  if(s==='add'){resetAdd();checkApiWarn();}
+}
+
+// ===== DARK MODE =====
+function toggleDark(){
+  document.documentElement.classList.toggle('dark');
+  const d=document.documentElement.classList.contains('dark');
+  document.getElementById('dark-icon').textContent=d?'light_mode':'dark_mode';
+  document.getElementById('dark-toggle').classList.toggle('on',d);
+  localStorage.setItem('dark_mode',d?'1':'0');
+}
+
+// ===== TOAST =====
+let _tt;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ===== PRODUCTS =====
+function renderProducts(){
+  const g=document.getElementById('product-grid');
+  if(!g)return;
+  const searchEl=document.getElementById('search-input');
+  const q=(searchEl?searchEl.value||'':'').toLowerCase();
+  const list=products.filter(p=>(currentTab==='all'||p.status===currentTab)&&(!q||p.name.toLowerCase().includes(q)));
+  if(!list.length){g.innerHTML=`<div class="col-span-2 flex flex-col items-center justify-center py-16 text-slate-400 gap-3"><span class="material-symbols-outlined text-5xl">search_off</span><p class="text-sm">Không tìm thấy</p></div>`;return;}
+  g.innerHTML=list.map(p=>`<div class="product-card flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div class="w-full aspect-square bg-center bg-no-repeat bg-cover relative bg-slate-100 dark:bg-slate-700 cursor-pointer" style="background-image:url('${p.img}')" onclick="openDetail(${p.id})">
+      ${p.tag==='hot'?'<div class="absolute top-2 right-2 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full">HOT</div>':''}
+      ${p.status==='draft'?'<div class="absolute top-2 left-2 bg-slate-700 text-white text-[10px] font-bold px-2 py-1 rounded-full">NHÁP</div>':''}
+      ${p.status==='out'?'<div class="absolute top-2 left-2 bg-slate-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">HẾT HÀNG</div>':''}
+    </div>
+    <div class="p-3 flex flex-col flex-1">
+      <p class="text-sm font-semibold line-clamp-2 mb-1 cursor-pointer hover:text-primary transition-colors" onclick="openDetail(${p.id})">${p.name}</p>
+      ${p.orig?`<p class="text-slate-400 text-xs line-through">${p.orig}</p>`:''}
+      <p class="text-primary text-base font-bold mb-2">${p.price}</p>
+      ${p.affiliateUrl?`<button class="w-full bg-primary text-white py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 btn-press mb-2" onclick="buyNow(${p.id})"><span class="material-symbols-outlined text-sm">shopping_cart</span> Mua ngay</button>`:''}
+      <button class="w-full bg-primary/10 text-primary py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 btn-press mb-2" onclick="copyLink(${p.id})">
+        <span class="material-symbols-outlined text-sm">link</span> Sao chép link
+      </button>
+      <div class="flex gap-1.5">
+        <button onclick="openDetail(${p.id})" class="flex-1 h-8 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 btn-press">
+          <span class="material-symbols-outlined text-xs">visibility</span> Chi tiết
+        </button>
+        <button onclick="openEditModal(${p.id})" class="flex-1 h-8 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 btn-press">
+          <span class="material-symbols-outlined text-xs">edit</span> Sửa
+        </button>
+        <button onclick="openDeleteProduct(${p.id})" class="h-8 w-8 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-lg flex items-center justify-center shrink-0 btn-press">
+          <span class="material-symbols-outlined text-xs">delete</span>
+        </button>
+      </div>
+    </div>
+  </div>`).join('');
+  const c=document.getElementById('stat-products-count');
+  if(c)c.textContent=products.filter(p=>p.status==='active').length;
+}
+function filterProducts(){renderProducts();}
+function setTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  renderProducts();
+}
+function copyLink(id){const p=products.find(x=>x.id===id);if(p){const link=p.affiliateUrl||`https://affiliate.example.com/?ref=user&id=${p.id}`;navigator.clipboard?.writeText(link).catch(()=>{});showToast('✅ Đã sao chép link affiliate!');}}
+function buyNow(id){
+  const p=products.find(x=>x.id===id);
+  if(!p)return;
+  if(p.affiliateUrl){
+    p.clicks=(p.clicks||0)+1;saveData();
+    window.open(p.affiliateUrl,'_blank','noopener,noreferrer');
+  }else{
+    showToast('⚠️ Sản phẩm này chưa có link affiliate');
+  }
+}
+
+
+// ===== DETAIL MODAL =====
+let _detailId=null;
+function openDetail(id){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  _detailId=id;
+  document.getElementById('dm-img').style.backgroundImage=`url('${p.img}')`;
+  document.getElementById('dm-name').textContent=p.name;
+  document.getElementById('dm-source').textContent=p.source||'Sàn TMĐT';
+  document.getElementById('dm-price').textContent=p.price;
+  document.getElementById('dm-orig').textContent=p.orig||'';
+  document.getElementById('dm-commission').textContent=p.commission||'—';
+  document.getElementById('dm-clicks').textContent=p.clicks||0;
+  document.getElementById('dm-orders').textContent=p.orders||0;
+  const tagEl=document.getElementById('dm-tag');
+  if(p.tag==='hot'){tagEl.style.display='';tagEl.textContent='HOT';}else{tagEl.style.display='none';}
+  const statusEl=document.getElementById('dm-status-badge');
+  const statusMap={active:'Đang bán',draft:'Nháp',out:'Hết hàng'};
+  const colorMap={active:'bg-emerald-500',draft:'bg-slate-400',out:'bg-rose-400'};
+  statusEl.textContent=statusMap[p.status]||'';
+  statusEl.className=`text-white text-xs font-bold px-2 py-1 rounded-full ${colorMap[p.status]||'bg-slate-400'}`;
+  document.getElementById('dm-copy-btn').onclick=()=>{copyLink(id);showToast('✅ Đã sao chép!');};
+  document.getElementById('dm-edit-btn').onclick=()=>{closeDetailModal();openEditModal(id);};
+  document.getElementById('dm-delete-btn').onclick=()=>{closeDetailModal();openDeleteProduct(id);};
+  // Nút Mua ngay trong detail modal
+  const buyWrap=document.getElementById('dm-buy-wrap');
+  const buyBtn=document.getElementById('dm-buy-btn');
+  if(p.affiliateUrl){buyWrap.style.display='block';buyBtn.onclick=()=>{buyNow(id);closeDetailModal();};}
+  else{buyWrap.style.display='none';}
+  document.getElementById('detail-modal').style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeDetailModal(){document.getElementById('detail-modal').style.display='none';document.body.style.overflow='';}
+
+// ===== EDIT MODAL =====
+let _editId=null,_editTagHot=false;
+function openEditModal(id){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  _editId=id;_editTagHot=p.tag==='hot';
+  document.getElementById('em-name').value=p.name||'';
+  document.getElementById('em-img').value=p.img||'';
+  document.getElementById('em-orig').value=p.orig||'';
+  document.getElementById('em-price').value=p.price||'';
+  document.getElementById('em-commission').value=p.commission||'';
+  document.getElementById('em-affiliate').value=p.affiliateUrl||'';
+  document.getElementById('em-status').value=p.status||'active';
+  updateEditTagBtn();
+  document.getElementById('edit-modal').style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeEditModal(){document.getElementById('edit-modal').style.display='none';document.body.style.overflow='';}
+function toggleEditTag(tag){if(tag==='hot'){_editTagHot=!_editTagHot;updateEditTagBtn();}}
+function updateEditTagBtn(){const btn=document.getElementById('em-tag-hot');if(_editTagHot){btn.classList.add('bg-primary/10','text-primary','border-primary');btn.classList.remove('border-slate-200','dark:border-slate-700');}else{btn.classList.remove('bg-primary/10','text-primary','border-primary');btn.classList.add('border-slate-200','dark:border-slate-700');}}
+function saveEditProduct(){
+  const idx=products.findIndex(x=>x.id===_editId);if(idx===-1)return;
+  products[idx]={...products[idx],name:document.getElementById('em-name').value,img:document.getElementById('em-img').value,orig:document.getElementById('em-orig').value,price:document.getElementById('em-price').value,commission:document.getElementById('em-commission').value,affiliateUrl:document.getElementById('em-affiliate').value.trim(),status:document.getElementById('em-status').value,tag:_editTagHot?'hot':''};
+  saveData();closeEditModal();renderProducts();showToast('✅ Đã cập nhật sản phẩm!');
+}
+
+// ===== DELETE PRODUCT MODAL =====
+let _deleteProductId=null;
+function openDeleteProduct(id){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  _deleteProductId=id;
+  document.getElementById('delete-product-name').textContent=p.name;
+  document.getElementById('delete-product-modal').style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeDeleteProductModal(){document.getElementById('delete-product-modal').style.display='none';document.body.style.overflow='';}
+function confirmDeleteProduct(){
+  products=products.filter(x=>x.id!==_deleteProductId);
+  saveData();closeDeleteProductModal();renderProducts();updateStorageInfo();showToast('🗑️ Đã xóa sản phẩm!');
+}
+
+// ===== ADD =====
+function checkApiWarn(){document.getElementById('api-warning').style.display=getKey()?'none':'flex';}
+function setMethod(m){
+  currentMethod=m;
+  document.getElementById('method-url').classList.toggle('active',m==='url');
+  document.getElementById('method-image').classList.toggle('active',m==='image');
+  document.getElementById('section-url').style.display=m==='url'?'block':'none';
+  document.getElementById('section-image').style.display=m==='image'?'block':'none';
+  hideResult();
+}
+function hideResult(){document.getElementById('scan-skeleton').style.display='none';document.getElementById('preview-section').style.display='none';}
+function resetAdd(){
+  document.getElementById('product-url').value='';
+  document.getElementById('affiliate-url-input').value='';
+  document.getElementById('affiliate-url-preview').style.display='none';
+  imgBase64=null;
+  document.getElementById('img-thumb').style.display='none';
+  document.getElementById('img-thumb').src='';
+  document.getElementById('upload-placeholder').style.display='block';
+  document.getElementById('btn-scan-img').style.display='none';
+  hideResult();
+  document.getElementById('edit-section').style.display='none';
+  activeTags=[];
+  document.querySelectorAll('.tag-btn').forEach(b=>b.classList.remove('bg-primary/10','text-primary','border-primary'));
+  pendingProduct=null;
+  setMethod('url');
+}
+function setScanLoading(msg){
+  const id=currentMethod==='url'?'btn-scan-url':'btn-scan-img';
+  const btn=document.getElementById(id);
+  btn.innerHTML=`<span class="spinner"></span>&nbsp;${msg}`;btn.disabled=true;
+  document.getElementById('scan-skeleton').style.display='block';
+  document.getElementById('preview-section').style.display='none';
+}
+function clearScanLoading(){
+  document.getElementById('btn-scan-url').innerHTML=`<span class="material-symbols-outlined text-sm">auto_awesome</span> Nhận diện với Gemini AI`;
+  document.getElementById('btn-scan-url').disabled=false;
+  document.getElementById('btn-scan-img').innerHTML=`<span class="material-symbols-outlined text-sm">auto_awesome</span> Phân tích ảnh với Gemini AI`;
+  document.getElementById('btn-scan-img').disabled=false;
+  document.getElementById('scan-skeleton').style.display='none';
+}
+async function pasteClipboard(){try{const t=await navigator.clipboard.readText();document.getElementById('product-url').value=t;showToast('📋 Đã dán');}catch{showToast('⚠️ Không thể đọc clipboard');}}
+async function pasteAffiliateLink(){
+  try{
+    const t=await navigator.clipboard.readText();
+    document.getElementById('affiliate-url-input').value=t;
+    showAffiliatePreview(t);
+    showToast('📋 Đã dán link affiliate!');
+  }catch{showToast('⚠️ Không thể đọc clipboard');}
+}
+function showAffiliatePreview(url){
+  const el=document.getElementById('affiliate-url-preview');
+  if(url){el.textContent='🔗 '+url;el.style.display='block';}
+  else{el.style.display='none';}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('affiliate-url-input');
+  if(inp)inp.addEventListener('input',e=>showAffiliatePreview(e.target.value));
+});
+
+// ===== GEMINI API =====
+const PROMPT=`Bạn là trợ lý trích xuất thông tin sản phẩm. Hãy đọc nội dung và trả về ĐÚNG MỘT ĐỐI TƯỢNG JSON hợp lệ, không có bất kỳ văn bản nào khác trước hoặc sau.
+Các trường bắt buộc (dùng chuỗi rỗng nếu không tìm thấy, KHÔNG dùng null):
+- name: tên đầy đủ của sản phẩm
+- price: giá bán hiện tại kèm đơn vị (ví dụ: 299.000đ)
+- orig: giá gốc trước giảm (để trống nếu không có)
+- img: URL ảnh sản phẩm đầu tiên (để trống nếu không có)
+- source: tên sàn thương mại (Shopee / Lazada / Tiki / TikTok Shop / ...)
+- commission: ước tính hoa hồng 5% của giá bán (ví dụ: ~14.950đ)
+- desc: mô tả sản phẩm ngắn gọn trong 1 câu, không dùng ký tự nháy đơn hay nháy kép bên trong
+Nếu không trích xuất được: {"error":"Không đọc được thông tin sản phẩm"}
+CHÚ Ý: Chỉ trả về JSON thuần, không markdown, không giải thích, không backtick.`;
+
+// Hàm trích xuất JSON an toàn từ text Gemini trả về
+function extractJSON(text){
+  if(!text)return null;
+  // Thử parse thẳng trước
+  try{return JSON.parse(text.trim());}catch(e){}
+  // Tìm JSON object trong text (từ { đến } cuối cùng)
+  const match=text.match(/\{[\s\S]*\}/);
+  if(match){
+    try{return JSON.parse(match[0]);}catch(e){}
+  }
+  // Thử sửa JSON bị cắt: thêm dấu đóng nếu thiếu
+  try{
+    let t=text.trim();
+    // Xóa markdown nếu có
+    t=t.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
+    // Đếm ngoặc để tìm phần JSON hợp lệ
+    let depth=0,start=-1,end=-1;
+    for(let i=0;i<t.length;i++){
+      if(t[i]==='{'){if(depth===0)start=i;depth++;}
+      else if(t[i]==='}'){depth--;if(depth===0){end=i;break;}}
+    }
+    if(start!==-1&&end!==-1){return JSON.parse(t.slice(start,end+1));}
+    // Cố gắng sửa JSON bị cắt bằng cách đóng ngoặc
+    if(start!==-1){
+      let fragment=t.slice(start);
+      // Đóng string đang mở nếu có
+      const quoteCount=(fragment.match(/(?<!\\)"/g)||[]).length;
+      if(quoteCount%2!==0)fragment+='"';
+      fragment+='}';
+      try{return JSON.parse(fragment);}catch(e){}
+    }
+  }catch(e){}
+  return null;
+}
+
+async function callGemini(parts){
+  const key=getKey();
+  if(!key)throw new Error('Chưa có API Key');
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      contents:[{parts}],
+      generationConfig:{temperature:0.1,maxOutputTokens:2048},
+      safetySettings:[
+        {category:"HARM_CATEGORY_HARASSMENT",threshold:"BLOCK_NONE"},
+        {category:"HARM_CATEGORY_HATE_SPEECH",threshold:"BLOCK_NONE"}
+      ]
+    })
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${res.status}`);}
+  const d=await res.json();
+  return d?.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+
+async function scanFromUrl(){
+  const url=document.getElementById('product-url').value.trim();
+  if(!url.startsWith('http')){showToast('⚠️ Link không hợp lệ');return;}
+  if(!getKey()){showToast('⚠️ Chưa có API Key');navigate('settings');return;}
+  setScanLoading('Đang đọc trang web...');
+  try{
+    const text=await callGemini([{text:PROMPT+'\nURL sản phẩm: '+url}]);
+    if(!text)throw new Error('Không nhận được phản hồi từ AI');
+    const data=extractJSON(text);
+    if(!data)throw new Error('AI trả về dữ liệu không hợp lệ — thử lại hoặc dùng ảnh chụp');
+    if(data.error)throw new Error(data.error);
+    showPreview(data);
+  }catch(e){clearScanLoading();showToast(`❌ ${e.message.slice(0,70)}`);}
+}
+
+function handleImgSelect(e){const f=e.target.files[0];if(f)loadImg(f);}
+function handleImgDrop(e){const f=e.dataTransfer.files[0];if(f)loadImg(f);}
+function loadImg(file){
+  if(!file.type.startsWith('image/')){showToast('⚠️ Chỉ hỗ trợ ảnh');return;}
+  imgMime=file.type;
+  const r=new FileReader();
+  r.onload=ev=>{
+    imgBase64=ev.target.result.split(',')[1];
+    const t=document.getElementById('img-thumb');
+    t.src=ev.target.result;t.style.display='block';
+    document.getElementById('upload-placeholder').style.display='none';
+    document.getElementById('btn-scan-img').style.display='flex';
+  };
+  r.readAsDataURL(file);
+}
+
+async function scanFromImage(){
+  if(!imgBase64){showToast('⚠️ Chưa chọn ảnh');return;}
+  if(!getKey()){showToast('⚠️ Chưa có API Key');navigate('settings');return;}
+  setScanLoading('Đang phân tích ảnh...');
+  try{
+    const text=await callGemini([{text:PROMPT+'\nĐây là ảnh chụp màn hình sản phẩm, hãy đọc và trích xuất thông tin:'},{inline_data:{mime_type:imgMime,data:imgBase64}}]);
+    if(!text)throw new Error('Không nhận được phản hồi từ AI');
+    const data=extractJSON(text);
+    if(!data)throw new Error('AI trả về dữ liệu không hợp lệ — thử lại');
+    if(data.error)throw new Error(data.error);
+    showPreview(data);
+  }catch(e){clearScanLoading();showToast(`❌ ${e.message.slice(0,60)}`);}
+}
+
+function showPreview(data){
+  clearScanLoading();
+  pendingProduct={name:data.name||'',price:data.price||'',orig:data.orig||'',img:data.img||'',commission:data.commission||'~0đ',source:data.source||'Sàn TMĐT',desc:data.desc||''};
+  const imgEl=document.getElementById('preview-img');
+  const noImg=document.getElementById('preview-no-img');
+  if(pendingProduct.img){imgEl.style.backgroundImage=`url('${pendingProduct.img}')`;noImg.style.display='none';}
+  else if(imgBase64&&currentMethod==='image'){imgEl.style.backgroundImage=`url('data:${imgMime};base64,${imgBase64}')`;noImg.style.display='none';}
+  else{imgEl.style.backgroundImage='';noImg.style.display='flex';}
+  document.getElementById('preview-source').textContent=pendingProduct.source;
+  document.getElementById('preview-name').textContent=pendingProduct.name;
+  document.getElementById('preview-price').textContent=pendingProduct.price;
+  document.getElementById('preview-orig').textContent=pendingProduct.orig;
+  document.getElementById('preview-commission').textContent=pendingProduct.commission+' mỗi đơn hàng';
+  const desc=document.getElementById('preview-desc');
+  if(pendingProduct.desc){desc.textContent=pendingProduct.desc;desc.style.display='block';}else{desc.style.display='none';}
+  document.getElementById('edit-name').value=pendingProduct.name;
+  document.getElementById('edit-img').value=pendingProduct.img;
+  document.getElementById('edit-orig').value=pendingProduct.orig;
+  document.getElementById('edit-price').value=pendingProduct.price;
+  document.getElementById('edit-commission').value=pendingProduct.commission;
+  document.getElementById('preview-section').style.display='block';
+  showToast('✅ Nhận diện thành công!');
+}
+
+function toggleEdit(){const s=document.getElementById('edit-section');s.style.display=s.style.display==='none'?'block':'none';}
+function applyEdit(){
+  if(!pendingProduct)return;
+  pendingProduct.name=document.getElementById('edit-name').value;
+  pendingProduct.img=document.getElementById('edit-img').value;
+  pendingProduct.orig=document.getElementById('edit-orig').value;
+  pendingProduct.price=document.getElementById('edit-price').value;
+  pendingProduct.commission=document.getElementById('edit-commission').value;
+  document.getElementById('preview-name').textContent=pendingProduct.name;
+  document.getElementById('preview-orig').textContent=pendingProduct.orig;
+  document.getElementById('preview-price').textContent=pendingProduct.price;
+  document.getElementById('preview-commission').textContent=pendingProduct.commission+' mỗi đơn hàng';
+  if(pendingProduct.img)document.getElementById('preview-img').style.backgroundImage=`url('${pendingProduct.img}')`;
+  document.getElementById('edit-section').style.display='none';
+  showToast('✅ Đã cập nhật!');
+}
+
+function toggleTag(tag){
+  const btn=document.getElementById('tag-'+tag);const idx=activeTags.indexOf(tag);
+  if(idx===-1){activeTags.push(tag);btn.classList.add('bg-primary/10','text-primary','border-primary');}
+  else{activeTags.splice(idx,1);btn.classList.remove('bg-primary/10','text-primary','border-primary');}
+}
+
+function saveProduct(){
+  if(!pendingProduct?.name){showToast('⚠️ Nhận diện sản phẩm trước');return;}
+  const img=pendingProduct.img||(imgBase64&&currentMethod==='image'?`data:${imgMime};base64,${imgBase64}`:'');
+  const affiliateUrl=document.getElementById('affiliate-url-input').value.trim();
+  const p={id:Date.now(),name:pendingProduct.name,price:pendingProduct.price,orig:pendingProduct.orig,img,commission:pendingProduct.commission,tag:activeTags.includes('hot')?'hot':'',status:activeTags.includes('draft')?'draft':'active',clicks:0,orders:0,affiliateUrl};
+  if(activeTags.includes('top'))products.unshift(p);else products.push(p);
+  saveData();showToast('🎉 Đã lưu sản phẩm!');setTimeout(()=>navigate('products'),900);
+}
+
+// ===== STATS =====
+const sData={today:{commission:'1.250.000đ',clicks:'842',orders:'24'},week:{commission:'5.800.000đ',clicks:'3.120',orders:'118'},month:{commission:'12.500.000đ',clicks:'4.820',orders:'277'},year:{commission:'87.300.000đ',clicks:'48.200',orders:'2.770'}};
+const cData={today:[20,45,90,60,40,55,35],week:[60,80,70,90,55,85,65],month:[30,45,90,60,40,55,35],year:[55,70,80,65,90,75,85]};
+const days=['T2','T3','T4','T5','T6','T7','CN'];
+function renderStats(){renderChart('today');renderTop();document.getElementById('stat-products-count').textContent=products.filter(p=>p.status==='active').length;}
+function setTimeRange(btn,r){document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const d=sData[r];document.getElementById('stat-commission').textContent=d.commission;document.getElementById('stat-clicks').textContent=d.clicks;document.getElementById('stat-orders').textContent=d.orders;renderChart(r);}
+function renderChart(r){const bars=document.getElementById('chart-bars');const d=cData[r];const mx=Math.max(...d);bars.innerHTML=d.map((h,i)=>`<div class="flex flex-col items-center gap-2"><div class="w-full rounded-t-sm bar" style="height:${h}%;background:${h===mx?'#ee4b2b':'rgba(238,75,43,0.2)'}"></div><span class="text-[10px] font-bold text-slate-400">${days[i]}</span></div>`).join('');}
+function renderTop(){const c=document.getElementById('top-products');const s=[...products].filter(p=>p.status==='active').sort((a,b)=>b.orders-a.orders).slice(0,3);if(!s.length){c.innerHTML=`<p class="text-center text-slate-400 text-sm py-8">Chưa có sản phẩm</p>`;return;}c.innerHTML=s.map(p=>`<div class="flex gap-4 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm product-card"><div class="w-20 h-20 rounded-lg flex-shrink-0 bg-slate-100 dark:bg-slate-700 bg-cover bg-center" style="background-image:url('${p.img}')"></div><div class="flex-1 flex flex-col justify-between py-1"><div><h3 class="text-sm font-bold line-clamp-1">${p.name}</h3><p class="text-xs text-slate-500">Affiliate</p></div><div class="flex justify-between items-end"><div><p class="text-primary font-bold">${p.price}</p><p class="text-[10px] text-emerald-500">${p.commission}</p></div><div class="text-right"><p class="text-xs font-bold">${p.orders} đơn</p><p class="text-[10px] text-slate-400">${p.clicks} clicks</p></div></div></div></div>`).join('');}
+
+// ===== SETTINGS =====
+function loadKeyToInput(){const k=getKey();if(k)document.getElementById('api-key-input').value=k;updateKeyStatus();}
+function updateKeyStatus(){const k=getKey();const s=document.getElementById('api-key-status');const d=document.getElementById('api-key-dot');if(k){s.textContent=`Đã cấu hình (${k.slice(0,8)}...)`;s.className='text-xs text-emerald-500';d.className='size-3 rounded-full bg-emerald-500';}else{s.textContent='Chưa cấu hình';s.className='text-xs text-red-400';d.className='size-3 rounded-full bg-red-400';}}
+function saveApiKey(){const v=document.getElementById('api-key-input').value.trim();if(!v){showToast('⚠️ Nhập API Key');return;}if(!v.startsWith('AIza')){showToast('⚠️ Key không hợp lệ (phải bắt đầu AIza...)');return;}localStorage.setItem('gemini_api_key',v);updateKeyStatus();checkApiWarn();showToast('✅ Đã lưu API Key!');}
+function clearApiKey(){localStorage.removeItem('gemini_api_key');document.getElementById('api-key-input').value='';updateKeyStatus();showToast('🗑️ Đã xóa key');}
+function toggleKeyVis(){const i=document.getElementById('api-key-input');const e=document.getElementById('key-eye');if(i.type==='password'){i.type='text';e.textContent='visibility_off';}else{i.type='password';e.textContent='visibility';}}
+async function testApiKey(){
+  const k=getKey();if(!k){showToast('⚠️ Nhập API Key trước');return;}
+  showToast('🔄 Đang kiểm tra...');
+  try{const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${k}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Trả lời: OK'}]}],generationConfig:{maxOutputTokens:10}})});if(res.ok)showToast('✅ API Key hoạt động tốt!');else{const e=await res.json();showToast(`❌ ${e?.error?.message?.slice(0,50)||'Key không hợp lệ'}`);}}
+  catch{showToast('❌ Không kết nối được API');}
+}
+function exportData(){const b=new Blob([JSON.stringify(products,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`affiliate-${new Date().toISOString().slice(0,10)}.json`;a.click();showToast('📥 Đang tải file...');}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d))throw 0;products=[...d,...products.filter(p=>!d.find(i=>i.id===p.id))];saveData();renderProducts();showToast(`✅ Đã nhập ${d.length} sản phẩm!`);}catch{showToast('❌ File không hợp lệ');}};r.readAsText(f);e.target.value='';}
+function updateStorageInfo(){const sz=JSON.stringify(products).length;document.getElementById('storage-info').textContent=`${products.length} sản phẩm · ${(sz/1024).toFixed(1)} KB`;}
+function confirmDeleteAll(){document.getElementById('confirm-modal').style.display='flex';}
+function closeModal(){document.getElementById('confirm-modal').style.display='none';}
+function deleteAll(){products=[];saveData();closeModal();navigate('products');updateStorageInfo();showToast('🗑️ Đã xóa toàn bộ dữ liệu');}
+
+// ===== INIT =====
+(function(){
+  const d=localStorage.getItem('dark_mode');
+  if(d==='0'){document.documentElement.classList.remove('dark');document.getElementById('dark-icon').textContent='dark_mode';document.getElementById('dark-toggle').classList.remove('on');}
+  else{document.documentElement.classList.add('dark');document.getElementById('dark-icon').textContent='light_mode';document.getElementById('dark-toggle').classList.add('on');}
+  renderProducts();
+  updateKeyStatus();
+  checkPWAState();
+})();
+</script>
+</body>
+</html>
