@@ -393,9 +393,51 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100dvh}
       </div>
     </section>
 
+    <!-- ===== CLOUDFLARE WORKER ===== -->
+    <section class="mt-4">
+      <h3 class="text-xs font-bold uppercase tracking-widest px-6 pb-2 opacity-60">Cloudflare Worker (Scraper)</h3>
+      <div class="flex flex-col px-4">
+        <div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="size-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-orange-500">cloud</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-base">Worker URL</p>
+              <p class="text-xs mt-0.5" id="worker-status">Chưa cấu hình — sẽ dùng AI trực tiếp</p>
+            </div>
+            <span id="worker-dot" class="size-3 rounded-full bg-slate-300 shrink-0"></span>
+          </div>
+          <div class="relative">
+            <input id="worker-url-input" type="url" placeholder="https://affiliate-scraper.ten-ban.workers.dev"
+              class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-orange-400/40 font-mono"/>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button onclick="saveWorkerUrl()" class="flex-1 h-10 rounded-lg bg-orange-500 text-white font-semibold text-sm btn-press">Lưu URL</button>
+            <button onclick="testWorker()" class="h-10 px-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-500 font-semibold text-sm btn-press border border-orange-200 dark:border-orange-800">Test</button>
+            <button onclick="clearWorkerUrl()" class="h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 text-sm btn-press">Xóa</button>
+          </div>
+          <!-- Luồng xử lý -->
+          <div class="mt-3 bg-slate-50 dark:bg-slate-900 rounded-lg p-3">
+            <p class="text-xs font-bold text-slate-500 mb-2">Luồng nhận diện khi có Worker:</p>
+            <div class="flex items-center gap-1 text-xs text-slate-500">
+              <span class="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-600 rounded font-semibold">Worker scrape</span>
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+              <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded font-semibold">Gemini bổ sung</span>
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+              <span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded font-semibold">Kết quả tốt nhất</span>
+            </div>
+          </div>
+          <a href="https://dash.cloudflare.com" target="_blank" class="flex items-center gap-1 mt-3 text-xs text-orange-500 hover:underline font-medium">
+            <span class="material-symbols-outlined text-sm">open_in_new</span> Triển khai Worker tại dash.cloudflare.com (miễn phí)
+          </a>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== GEMINI API KEY ===== -->
     <section class="mt-4">
-      <h3 class="text-xs font-bold uppercase tracking-widest px-6 pb-2 opacity-60">AI & Nhận diện sản phẩm</h3>
+      <h3 class="text-xs font-bold uppercase tracking-widest px-6 pb-2 opacity-60">Gemini AI (Phân tích ảnh & Fallback)</h3>
       <div class="flex flex-col px-4">
         <div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
           <div class="flex items-center gap-3 mb-3">
@@ -728,7 +770,7 @@ function navigate(s){
   if(t){t.classList.add('active');window.scrollTo(0,0);}
   if(s==='products')renderProducts();
   if(s==='stats')renderStats();
-  if(s==='settings'){updateStorageInfo();checkPWAState();loadKeyToInput();}
+  if(s==='settings'){updateStorageInfo();checkPWAState();loadKeyToInput();loadWorkerToInput();}
   if(s==='add'){resetAdd();checkApiWarn();}
 }
 
@@ -877,7 +919,7 @@ function confirmDeleteProduct(){
 }
 
 // ===== ADD =====
-function checkApiWarn(){document.getElementById('api-warning').style.display=getKey()?'none':'flex';}
+function checkApiWarn(){document.getElementById('api-warning').style.display=(getKey()||getWorkerUrl())?'none':'flex';}
 // setMethod removed — now using combined mode
 function hideResult(){document.getElementById('scan-skeleton').style.display='none';document.getElementById('preview-section').style.display='none';}
 function resetAdd(){
@@ -1047,34 +1089,98 @@ function updateAccuracyBar(){
   const url=document.getElementById('product-url').value.trim();
   const hasUrl=url.startsWith('http');
   const hasImg=!!imgBase64;
+  const hasWorker=!!getWorkerUrl();
   const bar=document.getElementById('accuracy-bar');
   const fill=document.getElementById('accuracy-fill');
   const label=document.getElementById('accuracy-label');
-  const btn=document.getElementById('btn-scan-label');
-  if(!hasUrl&&!hasImg){bar.style.display='none';btn.textContent='Nhận diện với Gemini AI';return;}
+  const btnLbl=document.getElementById('btn-scan-label');
+  if(!hasUrl&&!hasImg){bar.style.display='none';if(btnLbl)btnLbl.textContent='Nhận diện với Gemini AI';return;}
   bar.style.display='flex';
-  if(hasUrl&&hasImg){
-    fill.style.width='95%';fill.className='h-full rounded-full bg-emerald-500 transition-all duration-500';
+  if(hasUrl&&hasImg&&hasWorker){
+    fill.style.width='98%';fill.className='h-full rounded-full bg-emerald-500 transition-all duration-500';
+    label.textContent='Chính xác tối đa 🚀';label.className='text-xs font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap';
+    if(btnLbl)btnLbl.textContent='Scrape + Ảnh + AI — Tốt nhất';
+  }else if(hasUrl&&hasImg){
+    fill.style.width='90%';fill.className='h-full rounded-full bg-emerald-500 transition-all duration-500';
     label.textContent='Độ chính xác cao ✨';label.className='text-xs font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap';
-    btn.textContent='Nhận diện (Link + Ảnh) — Chính xác nhất';
+    if(btnLbl)btnLbl.textContent='Nhận diện (Link + Ảnh)';
+  }else if(hasUrl&&hasWorker){
+    fill.style.width='85%';fill.className='h-full rounded-full bg-orange-400 transition-all duration-500';
+    label.textContent='Scrape + AI 🔥';label.className='text-xs font-semibold text-orange-600 dark:text-orange-400 whitespace-nowrap';
+    if(btnLbl)btnLbl.textContent='Scrape với Worker + AI bổ sung';
   }else if(hasImg){
     fill.style.width='80%';fill.className='h-full rounded-full bg-blue-500 transition-all duration-500';
     label.textContent='Khá chính xác 👍';label.className='text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap';
-    btn.textContent='Nhận diện từ ảnh';
+    if(btnLbl)btnLbl.textContent='Nhận diện từ ảnh';
   }else{
     fill.style.width='50%';fill.className='h-full rounded-full bg-amber-400 transition-all duration-500';
     label.textContent='Thêm ảnh để tốt hơn';label.className='text-xs font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap';
-    btn.textContent='Nhận diện từ link';
+    if(btnLbl)btnLbl.textContent='Nhận diện từ link';
   }
 }
 
-// ===== SCAN COMBINED (link + ảnh) =====
+// ===== WORKER HELPERS =====
+function getWorkerUrl(){return localStorage.getItem('worker_url')||'';}
+function saveWorkerUrl(){
+  const v=document.getElementById('worker-url-input').value.trim();
+  if(!v){showToast('⚠️ Nhập Worker URL');return;}
+  if(!v.startsWith('http')){showToast('⚠️ URL không hợp lệ');return;}
+  localStorage.setItem('worker_url',v.replace(/\/$/,''));
+  updateWorkerStatus();updateAccuracyBar();showToast('✅ Đã lưu Worker URL!');
+}
+function clearWorkerUrl(){
+  localStorage.removeItem('worker_url');
+  document.getElementById('worker-url-input').value='';
+  updateWorkerStatus();updateAccuracyBar();showToast('🗑️ Đã xóa Worker URL');
+}
+function updateWorkerStatus(){
+  const url=getWorkerUrl();
+  const s=document.getElementById('worker-status');
+  const d=document.getElementById('worker-dot');
+  if(!s)return;
+  if(url){s.textContent=`Đã cấu hình (${new URL(url).hostname})`;s.className='text-xs text-emerald-500';d.className='size-3 rounded-full bg-emerald-500 shrink-0';}
+  else{s.textContent='Chưa cấu hình — sẽ dùng AI trực tiếp';s.className='text-xs text-slate-400';d.className='size-3 rounded-full bg-slate-300 shrink-0';}
+}
+async function testWorker(){
+  const url=getWorkerUrl();
+  if(!url){showToast('⚠️ Nhập Worker URL trước');return;}
+  showToast('🔄 Đang kiểm tra Worker...');
+  try{
+    const res=await fetch(url+'/',{method:'GET'});
+    const d=await res.json();
+    if(d.status==='ok')showToast('✅ Worker hoạt động tốt!');
+    else showToast('⚠️ Worker phản hồi không như mong đợi');
+  }catch{showToast('❌ Không kết nối được Worker');}
+}
+function loadWorkerToInput(){
+  const url=getWorkerUrl();
+  const inp=document.getElementById('worker-url-input');
+  if(inp&&url)inp.value=url;
+  updateWorkerStatus();
+}
+
+async function fetchFromWorker(productUrl){
+  const workerUrl=getWorkerUrl();
+  if(!workerUrl)return null;
+  const res=await fetch(`${workerUrl}/scrape?url=${encodeURIComponent(productUrl)}`,{
+    method:'GET',
+    headers:{'Content-Type':'application/json'},
+    signal:AbortSignal.timeout(12000),
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||`Worker HTTP ${res.status}`);}
+  return await res.json();
+}
+
+// ===== SCAN COMBINED (Worker → AI bổ sung/fallback) =====
 async function scanCombined(){
   const url=document.getElementById('product-url').value.trim();
   const hasUrl=url.startsWith('http');
   const hasImg=!!imgBase64;
+  const hasWorker=!!getWorkerUrl();
+  const hasKey=!!getKey();
+
   if(!hasUrl&&!hasImg){showToast('⚠️ Nhập link sản phẩm trước');return;}
-  if(!getKey()){showToast('⚠️ Chưa có API Key');navigate('settings');return;}
+  if(!hasKey&&!hasWorker){showToast('⚠️ Cần cấu hình Worker hoặc Gemini API Key');navigate('settings');return;}
 
   const btn=document.getElementById('btn-scan-main');
   btn.innerHTML=`<span class="spinner"></span>&nbsp;Đang phân tích...`;
@@ -1083,40 +1189,92 @@ async function scanCombined(){
   document.getElementById('preview-section').style.display='none';
 
   try{
-    let parts;
-    if(hasImg&&hasUrl){
-      // Chế độ kết hợp: ảnh là nguồn chính, URL để xác nhận nguồn
-      parts=[
-        {text: PROMPT_WITH_IMAGE + '\n\nURL sản phẩm (để xác định nguồn sàn): ' + url},
-        {inline_data:{mime_type:imgMime,data:imgBase64}}
-      ];
-    }else if(hasImg){
-      // Chỉ ảnh
-      parts=[
-        {text: PROMPT_WITH_IMAGE + '\n\nKhông có URL, hãy đọc toàn bộ từ ảnh.'},
-        {inline_data:{mime_type:imgMime,data:imgBase64}}
-      ];
+    let workerData=null;
+    let aiData=null;
+
+    // ── BƯỚC 1: Worker scrape (nhanh, miễn phí) ──
+    if(hasUrl&&hasWorker){
+      try{
+        btn.innerHTML=`<span class="spinner"></span>&nbsp;Worker đang scrape...`;
+        workerData=await fetchFromWorker(url);
+      }catch(e){
+        console.warn('Worker failed:',e.message);
+        workerData=null;
+      }
+    }
+
+    // ── BƯỚC 2: Quyết định có cần gọi AI không ──
+    const needAI = hasKey && (
+      hasImg ||                                         // Luôn dùng AI khi có ảnh (đọc giá chính xác)
+      !workerData ||                                    // Worker thất bại
+      !workerData.price ||                              // Worker không lấy được giá
+      !workerData.name                                  // Worker không lấy được tên
+    );
+
+    if(needAI){
+      btn.innerHTML=`<span class="spinner"></span>&nbsp;AI đang phân tích...`;
+      let parts;
+      if(hasImg&&hasUrl&&workerData){
+        // Chế độ tốt nhất: Worker đã có dữ liệu, AI dùng ảnh để bổ sung/xác nhận giá
+        const ctx=JSON.stringify({name:workerData.name,price:workerData.price,source:workerData.source});
+        parts=[
+          {text:PROMPT_WITH_IMAGE+`\n\nURL: ${url}\nDữ liệu đã scrape được (dùng để tham khảo, ưu tiên đọc từ ảnh nếu khác): ${ctx}`},
+          {inline_data:{mime_type:imgMime,data:imgBase64}}
+        ];
+      }else if(hasImg){
+        parts=[
+          {text:PROMPT_WITH_IMAGE+`\n\nURL (để xác định nguồn sàn): ${url||'không có'}`},
+          {inline_data:{mime_type:imgMime,data:imgBase64}}
+        ];
+      }else{
+        // Chỉ URL, không worker
+        parts=[{text:PROMPT_URL_ONLY+`\n\nURL: ${url}`}];
+      }
+      const text=await callGemini(parts);
+      if(text){aiData=extractJSON(text);}
+    }
+
+    // ── BƯỚC 3: Merge kết quả — AI ưu tiên nếu có, Worker bổ sung phần còn thiếu ──
+    let final={};
+    if(workerData&&aiData){
+      final={
+        name: aiData.name||workerData.name||'',
+        price: aiData.price||workerData.price||'',
+        orig: aiData.orig||workerData.orig||'',
+        img: workerData.img||aiData.img||'',  // Worker thường lấy ảnh chính xác hơn
+        source: workerData.source||aiData.source||'Sàn TMĐT',
+        commission: aiData.commission||workerData.commission||'',
+        desc: aiData.desc||workerData.desc||'',
+      };
+    }else if(workerData){
+      final=workerData;
+    }else if(aiData){
+      final=aiData;
     }else{
-      // Chỉ URL
-      parts=[{text: PROMPT_URL_ONLY + '\n\nURL: ' + url}];
+      throw new Error('Không lấy được thông tin. Hãy thêm ảnh chụp màn hình.');
     }
 
-    const text=await callGemini(parts);
-    if(!text)throw new Error('Không nhận được phản hồi từ AI');
-    const data=extractJSON(text);
-    if(!data)throw new Error('AI trả về dữ liệu không hợp lệ — hãy thử thêm ảnh chụp màn hình');
-    if(data.error)throw new Error(data.error);
+    if(final.error)throw new Error(final.error);
+    if(!final.name&&!final.price)throw new Error('Không đọc được thông tin sản phẩm.');
 
-    // Nếu chỉ dùng URL mà thiếu giá → gợi ý thêm ảnh
-    if(!data.price&&hasUrl&&!hasImg){
-      showToast('⚠️ Không đọc được giá — hãy thêm ảnh chụp màn hình để chính xác hơn');
+    // Badge cho biết dùng phương thức nào
+    const badge=document.getElementById('ai-badge');
+    if(badge){
+      if(workerData&&aiData)badge.innerHTML='<span class="material-symbols-outlined text-xs">cloud_done</span> Worker + AI';
+      else if(workerData)badge.innerHTML='<span class="material-symbols-outlined text-xs">cloud</span> Worker';
+      else badge.innerHTML='<span class="material-symbols-outlined text-xs">auto_awesome</span> Gemini AI';
     }
-    showPreview(data);
+
+    if(!final.price){
+      showToast('⚠️ Không đọc được giá — hãy thêm ảnh để AI đọc chính xác hơn');
+    }
+    showPreview(final);
+
   }catch(e){
     document.getElementById('scan-skeleton').style.display='none';
     btn.innerHTML=`<span class="material-symbols-outlined">auto_awesome</span>&nbsp;<span id="btn-scan-label">Nhận diện với Gemini AI</span>`;
     btn.disabled=false;
-    showToast(`❌ ${e.message.slice(0,70)}`);
+    showToast(`❌ ${e.message.slice(0,80)}`);
   }
 }
 
@@ -1211,6 +1369,7 @@ function deleteAll(){products=[];saveData();closeModal();navigate('products');up
   else{document.documentElement.classList.add('dark');document.getElementById('dark-icon').textContent='light_mode';document.getElementById('dark-toggle').classList.add('on');}
   renderProducts();
   updateKeyStatus();
+  updateWorkerStatus();
   checkPWAState();
 })();
 </script>
