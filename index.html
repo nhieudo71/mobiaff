@@ -98,7 +98,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100dvh}
   
   <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-primary/10 px-2 pb-6 pt-2 z-40">
     <div class="flex items-end justify-around max-w-lg mx-auto">
-      <button onclick="navigate('home')" class="flex flex-col items-center gap-1 text-slate-400 px-3"><span class="material-symbols-outlined">home</span><p class="text-[10px] font-medium">Trang chủ</p></button>
       <button class="flex flex-col items-center gap-1 text-primary px-3"><span class="material-symbols-outlined fill-icon">inventory_2</span><p class="text-[10px] font-bold">Sản phẩm</p></button>
       <button onclick="navigate('add')" class="flex flex-col items-center -mt-5 px-1">
         <span class="size-14 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center active:scale-95 transition-all border-4 border-white dark:border-slate-900">
@@ -106,7 +105,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100dvh}
         </span>
         <p class="text-[10px] font-bold text-primary mt-1">Thêm</p>
       </button>
-      <button onclick="navigate('stats')" class="flex flex-col items-center gap-1 text-slate-400 px-3"><span class="material-symbols-outlined">analytics</span><p class="text-[10px] font-medium">Thống kê</p></button>
       <button onclick="navigate('settings')" class="flex flex-col items-center gap-1 text-slate-400 px-3"><span class="material-symbols-outlined">person</span><p class="text-[10px] font-medium">Tôi</p></button>
     </div>
   </nav>
@@ -295,46 +293,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100dvh}
 </div>
 
 <!-- ===== STATS ===== -->
-<div class="screen page" id="screen-stats">
-  <header class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
-    <h1 class="text-xl font-bold tracking-tight">Thống kê chi tiết</h1>
-    <button onclick="showToast('Không có thông báo mới')" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"><span class="material-symbols-outlined">notifications</span></button>
-  </header>
-  <div class="bg-white dark:bg-slate-900 px-4 py-2 border-b border-slate-200 dark:border-slate-800">
-    <div class="flex gap-3 overflow-x-auto no-scrollbar py-2">
-      <button onclick="setTimeRange(this,'today')" class="time-btn active whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Hôm nay</button>
-      <button onclick="setTimeRange(this,'week')" class="time-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Tuần này</button>
-      <button onclick="setTimeRange(this,'month')" class="time-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Tháng này</button>
-      <button onclick="setTimeRange(this,'year')" class="time-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Năm nay</button>
-    </div>
-  </div>
-  <div class="overflow-y-auto flex-1 pb-24">
-    <div class="grid grid-cols-2 gap-4 p-4">
-      <div class="flex flex-col gap-2 rounded-xl p-5 bg-primary/10 border border-primary/20"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Hoa hồng dự kiến</p><p id="stat-commission" class="text-primary text-2xl font-bold">12.500.000đ</p><div class="flex items-center gap-1 text-emerald-600 text-sm font-bold"><span class="material-symbols-outlined text-sm">trending_up</span><span>15.4%</span></div></div>
-      <div class="flex flex-col gap-2 rounded-xl p-5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Tổng lượt click</p><p id="stat-clicks" class="text-2xl font-bold">4.820</p><div class="flex items-center gap-1 text-primary text-sm font-bold"><span class="material-symbols-outlined text-sm">trending_down</span><span>2.1%</span></div></div>
-      <div class="flex flex-col gap-2 rounded-xl p-5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Đơn hàng</p><p id="stat-orders" class="text-2xl font-bold">277</p><div class="flex items-center gap-1 text-emerald-600 text-sm font-bold"><span class="material-symbols-outlined text-sm">trending_up</span><span>8.3%</span></div></div>
-      <div class="flex flex-col gap-2 rounded-xl p-5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium">Sản phẩm</p><p id="stat-products-count" class="text-2xl font-bold">0</p><div class="flex items-center gap-1 text-emerald-600 text-sm font-bold"><span class="material-symbols-outlined text-sm">trending_up</span><span>Đang hoạt động</span></div></div>
-    </div>
-    <div class="px-4 py-2">
-      <div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div class="flex justify-between items-center mb-6"><div><p class="text-slate-500 text-sm">Lượt click theo ngày</p><p class="text-2xl font-bold">842 <span class="text-sm font-normal text-emerald-500">+12%</span></p></div><span class="material-symbols-outlined text-slate-400">bar_chart</span></div>
-        <div id="chart-bars" class="grid grid-cols-7 gap-2 items-end h-40"></div>
-      </div>
-    </div>
-    <div class="p-4 space-y-4">
-      <div class="flex justify-between items-center"><h2 class="text-lg font-bold">Sản phẩm chuyển đổi cao</h2><button onclick="navigate('products')" class="text-primary text-sm font-bold">Xem tất cả</button></div>
-      <div id="top-products" class="space-y-3"></div>
-    </div>
-  </div>
-  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-3">
-    <div class="flex items-center justify-between max-w-md mx-auto">
-      <button onclick="navigate('home')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">home</span><span class="text-[10px] font-bold">Trang chủ</span></button>
-      <button onclick="navigate('products')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">inventory_2</span><span class="text-[10px] font-bold">Sản phẩm</span></button>
-      <button class="flex flex-col items-center gap-1 text-primary"><span class="material-symbols-outlined fill-icon">analytics</span><span class="text-[10px] font-bold">Thống kê</span></button>
-      <button onclick="navigate('settings')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">person</span><span class="text-[10px] font-bold">Cá nhân</span></button>
-    </div>
-  </nav>
-</div>
 
 <!-- ===== SETTINGS ===== -->
 <div class="screen page" id="screen-settings">
@@ -532,9 +490,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100dvh}
 
   <nav class="fixed bottom-0 left-0 right-0 border-t border-slate-200 dark:border-slate-800 bg-bg-light/90 dark:bg-bg-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-40">
     <div class="flex items-center justify-around max-w-lg mx-auto">
-      <button onclick="navigate('home')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">home</span><p class="text-[10px] font-medium uppercase tracking-wider">Trang chủ</p></button>
       <button onclick="navigate('products')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">inventory_2</span><p class="text-[10px] font-medium uppercase tracking-wider">Sản phẩm</p></button>
-      <button onclick="navigate('stats')" class="flex flex-col items-center gap-1 text-slate-400"><span class="material-symbols-outlined">bar_chart</span><p class="text-[10px] font-medium uppercase tracking-wider">Thống kê</p></button>
       <button class="flex flex-col items-center gap-1 text-primary"><span class="material-symbols-outlined fill-icon">settings</span><p class="text-[10px] font-bold uppercase tracking-wider">Cài đặt</p></button>
     </div>
   </nav>
@@ -769,7 +725,6 @@ function navigate(s){
   const t=document.getElementById('screen-'+s);
   if(t){t.classList.add('active');window.scrollTo(0,0);}
   if(s==='products')renderProducts();
-  if(s==='stats')renderStats();
   if(s==='settings'){updateStorageInfo();checkPWAState();loadKeyToInput();loadWorkerToInput();}
   if(s==='add'){resetAdd();checkApiWarn();}
 }
@@ -822,8 +777,6 @@ function renderProducts(){
       </div>
     </div>
   </div>`).join('');
-  const c=document.getElementById('stat-products-count');
-  if(c)c.textContent=products.filter(p=>p.status==='active').length;
 }
 function filterProducts(){renderProducts();}
 function setTab(tab){
@@ -1142,15 +1095,57 @@ function updateWorkerStatus(){
   else{s.textContent='Chưa cấu hình — sẽ dùng AI trực tiếp';s.className='text-xs text-slate-400';d.className='size-3 rounded-full bg-slate-300 shrink-0';}
 }
 async function testWorker(){
-  const url=getWorkerUrl();
+  // Lấy URL từ input (chưa cần lưu)
+  const inp=document.getElementById('worker-url-input');
+  let url=(inp?inp.value.trim():'')||getWorkerUrl();
   if(!url){showToast('⚠️ Nhập Worker URL trước');return;}
+  url=url.replace(/\/$/,''); // bỏ dấu / cuối
+
+  // Cập nhật nút test
+  const btn=document.querySelector('button[onclick="testWorker()"]');
+  const origText=btn?btn.textContent:'';
+  if(btn){btn.textContent='⏳';btn.disabled=true;}
   showToast('🔄 Đang kiểm tra Worker...');
+
   try{
-    const res=await fetch(url+'/',{method:'GET'});
-    const d=await res.json();
-    if(d.status==='ok')showToast('✅ Worker hoạt động tốt!');
-    else showToast('⚠️ Worker phản hồi không như mong đợi');
-  }catch{showToast('❌ Không kết nối được Worker');}
+    // Thêm timeout 10s
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),10000);
+    const res=await fetch(url+'/',{method:'GET',signal:controller.signal});
+    clearTimeout(timer);
+
+    if(!res.ok){
+      showToast(`❌ Worker trả về HTTP ${res.status} — kiểm tra lại URL`);
+      return;
+    }
+    const text=await res.text();
+    let d;
+    try{d=JSON.parse(text);}catch{
+      // Nếu không phải JSON — có thể Worker chưa deploy đúng
+      showToast('⚠️ Worker không trả về JSON — kiểm tra lại code Worker');
+      return;
+    }
+    if(d.status==='ok'){
+      // Tự động lưu luôn khi test thành công
+      localStorage.setItem('worker_url',url);
+      if(inp)inp.value=url;
+      updateWorkerStatus();updateAccuracyBar();
+      showToast('✅ Worker hoạt động tốt! Đã lưu URL.');
+    }else{
+      showToast(`⚠️ Worker phản hồi lạ: ${JSON.stringify(d).slice(0,60)}`);
+    }
+  }catch(e){
+    if(e.name==='AbortError'){
+      showToast('❌ Timeout — Worker không phản hồi sau 10 giây');
+    }else if(e.message.includes('Failed to fetch')||e.message.includes('NetworkError')){
+      showToast('❌ Không kết nối được — kiểm tra URL và Worker có đang chạy không');
+    }else{
+      showToast(`❌ Lỗi: ${e.message.slice(0,60)}`);
+    }
+    console.error('Worker test error:',e);
+  }finally{
+    if(btn){btn.textContent=origText;btn.disabled=false;}
+  }
 }
 function loadWorkerToInput(){
   const url=getWorkerUrl();
@@ -1338,23 +1333,6 @@ function saveProduct(){
 const sData={today:{commission:'1.250.000đ',clicks:'842',orders:'24'},week:{commission:'5.800.000đ',clicks:'3.120',orders:'118'},month:{commission:'12.500.000đ',clicks:'4.820',orders:'277'},year:{commission:'87.300.000đ',clicks:'48.200',orders:'2.770'}};
 const cData={today:[20,45,90,60,40,55,35],week:[60,80,70,90,55,85,65],month:[30,45,90,60,40,55,35],year:[55,70,80,65,90,75,85]};
 const days=['T2','T3','T4','T5','T6','T7','CN'];
-function renderStats(){renderChart('today');renderTop();document.getElementById('stat-products-count').textContent=products.filter(p=>p.status==='active').length;}
-function setTimeRange(btn,r){document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const d=sData[r];document.getElementById('stat-commission').textContent=d.commission;document.getElementById('stat-clicks').textContent=d.clicks;document.getElementById('stat-orders').textContent=d.orders;renderChart(r);}
-function renderChart(r){const bars=document.getElementById('chart-bars');const d=cData[r];const mx=Math.max(...d);bars.innerHTML=d.map((h,i)=>`<div class="flex flex-col items-center gap-2"><div class="w-full rounded-t-sm bar" style="height:${h}%;background:${h===mx?'#ee4b2b':'rgba(238,75,43,0.2)'}"></div><span class="text-[10px] font-bold text-slate-400">${days[i]}</span></div>`).join('');}
-function renderTop(){const c=document.getElementById('top-products');const s=[...products].filter(p=>p.status==='active').sort((a,b)=>b.orders-a.orders).slice(0,3);if(!s.length){c.innerHTML=`<p class="text-center text-slate-400 text-sm py-8">Chưa có sản phẩm</p>`;return;}c.innerHTML=s.map(p=>`<div class="flex gap-4 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm product-card"><div class="w-20 h-20 rounded-lg flex-shrink-0 bg-slate-100 dark:bg-slate-700 bg-cover bg-center" style="background-image:url('${p.img}')"></div><div class="flex-1 flex flex-col justify-between py-1"><div><h3 class="text-sm font-bold line-clamp-1">${p.name}</h3><p class="text-xs text-slate-500">Affiliate</p></div><div class="flex justify-between items-end"><div><p class="text-primary font-bold">${p.price}</p><p class="text-[10px] text-emerald-500">${p.commission}</p></div><div class="text-right"><p class="text-xs font-bold">${p.orders} đơn</p><p class="text-[10px] text-slate-400">${p.clicks} clicks</p></div></div></div></div>`).join('');}
-
-// ===== SETTINGS =====
-function loadKeyToInput(){const k=getKey();if(k)document.getElementById('api-key-input').value=k;updateKeyStatus();}
-function updateKeyStatus(){const k=getKey();const s=document.getElementById('api-key-status');const d=document.getElementById('api-key-dot');if(k){s.textContent=`Đã cấu hình (${k.slice(0,8)}...)`;s.className='text-xs text-emerald-500';d.className='size-3 rounded-full bg-emerald-500';}else{s.textContent='Chưa cấu hình';s.className='text-xs text-red-400';d.className='size-3 rounded-full bg-red-400';}}
-function saveApiKey(){const v=document.getElementById('api-key-input').value.trim();if(!v){showToast('⚠️ Nhập API Key');return;}if(!v.startsWith('AIza')){showToast('⚠️ Key không hợp lệ (phải bắt đầu AIza...)');return;}localStorage.setItem('gemini_api_key',v);updateKeyStatus();checkApiWarn();showToast('✅ Đã lưu API Key!');}
-function clearApiKey(){localStorage.removeItem('gemini_api_key');document.getElementById('api-key-input').value='';updateKeyStatus();showToast('🗑️ Đã xóa key');}
-function toggleKeyVis(){const i=document.getElementById('api-key-input');const e=document.getElementById('key-eye');if(i.type==='password'){i.type='text';e.textContent='visibility_off';}else{i.type='password';e.textContent='visibility';}}
-async function testApiKey(){
-  const k=getKey();if(!k){showToast('⚠️ Nhập API Key trước');return;}
-  showToast('🔄 Đang kiểm tra...');
-  try{const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${k}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Trả lời: OK'}]}],generationConfig:{maxOutputTokens:10}})});if(res.ok)showToast('✅ API Key hoạt động tốt!');else{const e=await res.json();showToast(`❌ ${e?.error?.message?.slice(0,50)||'Key không hợp lệ'}`);}}
-  catch{showToast('❌ Không kết nối được API');}
-}
 function exportData(){const b=new Blob([JSON.stringify(products,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`affiliate-${new Date().toISOString().slice(0,10)}.json`;a.click();showToast('📥 Đang tải file...');}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d))throw 0;products=[...d,...products.filter(p=>!d.find(i=>i.id===p.id))];saveData();renderProducts();showToast(`✅ Đã nhập ${d.length} sản phẩm!`);}catch{showToast('❌ File không hợp lệ');}};r.readAsText(f);e.target.value='';}
 function updateStorageInfo(){const sz=JSON.stringify(products).length;document.getElementById('storage-info').textContent=`${products.length} sản phẩm · ${(sz/1024).toFixed(1)} KB`;}
