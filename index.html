@@ -1350,6 +1350,69 @@ function deleteAll(){products=[];saveData();closeModal();navigate('products');up
   updateWorkerStatus();
   checkPWAState();
 })();
+
+// ===== GEMINI API KEY =====
+function getKey(){return localStorage.getItem('gemini_api_key')||'';}
+function updateKeyStatus(){
+  const k=getKey();
+  const s=document.getElementById('api-key-status');
+  const dot=document.getElementById('api-key-dot');
+  if(!s)return;
+  if(k){
+    s.textContent='Đã cấu hình ✓';
+    s.className='text-xs text-emerald-500';
+    if(dot)dot.className='size-3 rounded-full bg-emerald-500 shrink-0';
+  }else{
+    s.textContent='Chưa cấu hình';
+    s.className='text-xs text-slate-400';
+    if(dot)dot.className='size-3 rounded-full bg-slate-300 shrink-0';
+  }
+}
+function loadKeyToInput(){
+  const k=getKey();
+  const inp=document.getElementById('api-key-input');
+  if(inp&&k)inp.value=k;
+  updateKeyStatus();
+}
+function saveApiKey(){
+  const inp=document.getElementById('api-key-input');
+  const v=(inp?inp.value:'').trim();
+  if(!v){showToast('⚠️ Nhập API Key trước');return;}
+  if(!v.startsWith('AIza')){showToast('⚠️ Key không hợp lệ (phải bắt đầu AIza...)');return;}
+  localStorage.setItem('gemini_api_key',v);
+  updateKeyStatus();
+  checkApiWarn();
+  showToast('✅ Đã lưu Gemini API Key!');
+}
+function clearApiKey(){
+  localStorage.removeItem('gemini_api_key');
+  const inp=document.getElementById('api-key-input');
+  if(inp)inp.value='';
+  updateKeyStatus();
+  checkApiWarn();
+  showToast('🗑️ Đã xóa API Key');
+}
+function toggleKeyVis(){
+  const inp=document.getElementById('api-key-input');
+  const eye=document.getElementById('key-eye');
+  if(!inp)return;
+  if(inp.type==='password'){inp.type='text';if(eye)eye.textContent='visibility_off';}
+  else{inp.type='password';if(eye)eye.textContent='visibility';}
+}
+async function testApiKey(){
+  const k=getKey();
+  if(!k){showToast('⚠️ Chưa có API Key');return;}
+  showToast('🔄 Đang kiểm tra...');
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${k}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:'Say "OK" only'}]}],generationConfig:{maxOutputTokens:5}})
+    });
+    if(res.ok)showToast('✅ API Key hợp lệ và hoạt động tốt!');
+    else{const e=await res.json().catch(()=>({}));showToast(`❌ Key lỗi: ${e?.error?.message||'HTTP '+res.status}`);}
+  }catch{showToast('❌ Không kết nối được Gemini API');}
+}
 </script>
 </body>
 </html>
